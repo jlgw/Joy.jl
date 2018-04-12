@@ -3,11 +3,6 @@ function insertat(b::Buffer, c::Char, pos)
     b.text[pos[1]] = string(pr[1:pos[2]-1], c, pr[pos[2]:end])
 end
 
-function escape(b::Buffer)
-    b.mode = normal_mode
-    clamp(b)
-end
-
 function deleteback(b::Buffer)
     b.cursor.pos[2] -= 1
     if b.cursor.pos[2] >= 1
@@ -23,13 +18,16 @@ function splitp(b::Buffer)
     b.cursor.pos[1] += 1
     b.cursor.pos[2] = 1
 end
-
+function escape_insert(b)
+    b.cursor.pos[2] -= 1
+    escape(b)
+end
 function insert_fn(c)
     function insert(b::Buffer)
         yp = b.cursor.pos[1]
         xp = b.cursor.pos[2]
         if c=='\e'
-            escape(b)
+            escape_insert(b)
         elseif c=='\x7f'
             deleteback(b)
             clamp(b, true)

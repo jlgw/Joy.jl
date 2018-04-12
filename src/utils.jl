@@ -11,6 +11,11 @@ function getwidth(b::Buffer)
     length(getline(b))
 end
 
+function escape(b::Buffer)
+    b.mode = normal_mode
+    clamp(b)
+end
+
 isint(c::Integer) = 48 < c < 57
 function parse_n(args::Array)
     n = length(args)
@@ -29,7 +34,8 @@ end
 
 function deleteat(b::Buffer, pos)
     pr = b.text[pos[1]]
-    b.text[pos[1]] = string(pr[1:pos[2]-1], pr[pos[2]+1:end])
+    n = parse_n(b)
+    b.text[pos[1]] = string(pr[1:pos[2]-1], pr[pos[2]+n:end])
 end
 
 function joinlines(b::Buffer, interval::Tuple, delimiter=" ")

@@ -1,5 +1,6 @@
 
 function init(text)
+    #t1 = time()
     cursor = Cursor([1,1])
     state = Dict()
     state[:actions] = []
@@ -10,9 +11,13 @@ function init(text)
     state[:log] = ""
     state[:top] = 1
     state[:bottom] = 30
+    #t2 = time()
     term = Base.REPL.Terminals.TTYTerminal(get(ENV, "TERM", "dumb"), STDIN, STDOUT, STDERR)
+    #t3 = time()
     Base.REPL.raw!(term, true)
     buffer = Buffer(term, text, cursor, normal_mode, state, [])
+    #t4 = time()
+    #buffer.state[:timelog] = "t2-t1: $(t2-t1), t3-t2: $(t3-t2), t4-t3: $(t4-t3)"
     return buffer
 end
 

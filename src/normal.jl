@@ -40,7 +40,7 @@ function move_bol(b::Buffer)
     clear_arg(b)
 end
 
-function delete(b::Buffer)
+function delete_char(b::Buffer)
     deleteat(b, b.cursor.pos)
     after_normal(b)
 end
@@ -56,19 +56,14 @@ function inserta(b::Buffer)
     b.mode = insert_mode
 end
 
-function gobottom(b::Buffer)
-    b.cursor.pos[1] = getheight(b)
+function gogo(b::Buffer)
+    b.cursor.pos[1] = parse_n(b)
+    escape(b)
     after_normal(b)
 end
-
-function go(b::Buffer)
-    if b.args == ['g']
-        b.cursor.pos[1] = 1
-    elseif b.args == ['G']
-        b.cursor.pos[1] = getheight(b)
-    else
-        return push!(b.args, 'g')
-    end
+function gobottom(b::Buffer)
+    b.cursor.pos[1] = getheight(b)
+    escape(b)
     after_normal(b)
 end
 
@@ -76,6 +71,54 @@ insertend(b::Buffer) = (move_eol(b); inserta(b))
 
 function enter_cmdmode(b::Buffer)
     b.mode = command_mode
+end
+
+go_actions = Dict('g' => gogo,
+                  'G' => gobottom,
+                  '\e' => escape,
+                 )
+go_mode = Mode("go", go_actions)
+
+function go(b::Buffer)
+    b.mode = go_mode
+end
+
+function set_register(c)
+    function set(b)
+        b.state[:recording] = c
+        #This is a bad solution since it assumes all key presses are saved and never purged
+        b.state[:macroindex] = length(b.state[:actions])+1
+        escape(b)
+        b.state[:log] = "Recording to register $c"
+    end
+end
+
+register_record_mode = Mode("register macro", Action(set_register, x->true))
+
+function record(b::Buffer)
+    if !in(:recording, keys(b.state)) || b.state[:recording] == '\e'
+        b.mode = register_record_mode
+    else
+        b.state[:macros][b.state[:recording]] = join(b.state[:actions][b.state[:macroindex]:end-1])
+        b.state[:log] = b.state[:macros][b.state[:recording]]
+    end
+end
+
+function replay_register(c)
+    function replay_macro(b::Buffer)
+        if in(c, keys(b.state[:macros]))
+            replay(b, b.state[:macros][c])
+        else
+            b.state[:log] = "No macro in register $c"
+        end
+        escape(b)
+    end
+end
+
+replay_mode = Mode("replay", Action(replay_register, x->true))
+
+function replay(b::Buffer)
+    b.mode = replay_mode
 end
 
 normal_actions = Dict('h'  => move_left,
@@ -88,10 +131,12 @@ normal_actions = Dict('h'  => move_left,
                       'A'  => insertend,
                       '\e' => clear_arg,
                       ':'  => enter_cmdmode,
-                      'x'  => delete,
+                      'x'  => delete_char,
                       'J'  => joinone,
                       'g'  => go,
                       'G'  => gobottom,
+                      'q' => record,
+                      '@' => replay,
                      )
 
 normal_mode = Mode("normal", normal_actions)

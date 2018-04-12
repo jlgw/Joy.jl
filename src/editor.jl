@@ -30,12 +30,14 @@ end
 #It would be nice if we had a macro so that all functions that take ::Buffer as argument
 #were defined without buffer as argument using the global self variable
 
-function open(st)
+function open(st::String)
+    t0 = time()
     data = readlines(st)
     self.text = data
     if !self.state[:running]
         attach(self)
     end
+    self.state[:tdata] = [t0, time()]
     self
 end
 
@@ -54,4 +56,4 @@ end
 function quit()
     quit(self)
 end
-
+q = quit
