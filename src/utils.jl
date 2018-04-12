@@ -1,22 +1,34 @@
-function getheight(b::Buffer)
+pos(b::Buffer)  = b.cursor.pos
+poss(b::Buffer) = "$(pos(b))"
+y(b::Buffer)    = b.cursor.pos[1]
+ys(b::Buffer)   = "$(y(b))"
+x(b::Buffer)    = b.cursor.pos[2]
+xs(b::Buffer)   = "$(x(b))"
+
+top(b::Buffer) = parse(Int64, b.state[:top])
+bottom(b::Buffer) = parse(Int64, b.state[:bottom])
+function height(b::Buffer)
     length(b.text)
 end
-function getline(b::Buffer)
-    b.text[b.cursor.pos[1]]
+function line(b::Buffer, line::Integer)
+    b.text[line]
 end
-function setline(b::Buffer, s::String)
-    b.text[b.cursor.pos[1]] = s
+line(b::Buffer) = line(b, y(b))
+function setline(b::Buffer, line::Integer, s::String)
+    b.text[line] = s
 end
-function getwidth(b::Buffer)
-    length(getline(b))
+setline(b::Buffer, s::String) = setline(b, y(b), s)
+
+function width(b::Buffer)
+    length(line(b))
 end
 
 function escape(b::Buffer)
-    b.mode = normal_mode
+    setmode(b, normal_mode)
     clamp(b)
 end
 
-isint(c::Integer) = 48 < c < 57
+isint(c::Integer) = 47 < c < 58
 function parse_n(args::Array)
     n = length(args)
     il = args[indexin([false], isint.(Int.(args)))[1]+1:end]
@@ -29,7 +41,7 @@ end
 parse_n(b::Buffer) = parse_n(b.args)
 
 function clear_arg(b::Buffer)
-    b.args = []
+    resize!(b.args,0)
 end
 
 function deleteat(b::Buffer, pos)
@@ -38,16 +50,29 @@ function deleteat(b::Buffer, pos)
     b.text[pos[1]] = string(pr[1:pos[2]-1], pr[pos[2]+n:end])
 end
 
+function paste(b::Buffer, pos, s::String)
+    setline(b, pos[1], line(b, pos[1])[1:pos[2]-1]*s*line(b, pos[1])[pos[2]:end])
+end
+paste(b::Buffer, s) = paste(b, pos(b), s)
+pastea(b::Buffer, s) = paste(b, pos(b)+[0,1], s)
+
 function joinlines(b::Buffer, interval::Tuple, delimiter=" ")
-    b.text = [b.text[1:interval[1]-1]...; 
-                   join(b.text[interval[1]:interval[2]]);
-                   b.text[interval[2]+1:end]...]
+    #settext is slow in this context, we can make this more efficient
+    settext(b, [b.text[1:interval[1]-1]...; 
+                join(b.text[interval[1]:min(end, interval[2])]);
+                b.text[interval[2]+1:end]...])
 end
 
 function splitlines(b::Buffer, pos)
-    b.text = [b.text[1:pos[1]-1]...; 
-                   [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][pos[2]:end]];
-                   b.text[pos[1]+1:end]...]
+    settext(b, [b.text[1:pos[1]-1]...; 
+                [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][pos[2]:end]];
+                b.text[pos[1]+1:end]...])
+end
+
+function delete_lines(b::Buffer, interval::Tuple)
+    #settext is slow in this context, we can make this more efficient
+    settext(b, [b.text[1:interval[1]-1]...; 
+                b.text[interval[2]+1:end]...])
 end
 
 function replay(b::Buffer, actions::String, n=1)
@@ -64,5 +89,5 @@ function nmap(c::Char, s::String)
 end
 
 function quit(b::Buffer)
-    b.state[:running] = false
+    b.state[:running] = "false"
 end

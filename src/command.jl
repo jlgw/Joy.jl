@@ -13,14 +13,15 @@ end
 function evalcmd(b::Buffer)
     try
         #rethink this
+        escape(b)
         c = eval(Base.parse_input_line(b.state[:command]))
         if b.state[:command][end] != ';'
-            b.state[:log] = c
+            b.state[:log] = "$c"
         end
         b.state[:command] = ""
-        escape(b)
     catch
         b.state[:log] = "INVALID COMMAND"
+        setmode(b, command_mode)
     end
 end
 

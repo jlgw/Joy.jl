@@ -1,13 +1,18 @@
+include("extra_modes.jl")
+
 function set_boundaries(b::Buffer)
-    if b.state[:top] > b.cursor.pos[1]
-        d = b.cursor.pos[1] - b.state[:top]
-    elseif b.state[:bottom] < b.cursor.pos[1]
-        d = b.cursor.pos[1] - b.state[:bottom]
+    #remove parsing from here
+    top, bottom = parse.([b.state[:top], b.state[:bottom]])
+    if top > b.cursor.pos[1]
+        d = b.cursor.pos[1] - top
+    elseif bottom < b.cursor.pos[1]
+        d = b.cursor.pos[1] - bottom
     else
         d = 0
     end
-    b.state[:top], b.state[:bottom] = Base.clamp([b.state[:top], b.state[:bottom]]+d, 
-                                                  1, length(b.text))
+    b.state[:top], b.state[:bottom] = string.(Base.clamp.([top,
+                                                           bottom]+d,
+                                                          1, length(b.text)))
 end
 function after_normal(b::Buffer)
     clear_arg(b)
@@ -32,7 +37,7 @@ function move_down(b::Buffer)
     after_normal(b)
 end
 function move_eol(b::Buffer)
-    b.cursor.pos[2] = getwidth(b)
+    b.cursor.pos[2] = width(b)
     clear_arg(b)
 end
 function move_bol(b::Buffer)
@@ -44,84 +49,37 @@ function delete_char(b::Buffer)
     deleteat(b, b.cursor.pos)
     after_normal(b)
 end
-function joinone(b::Buffer)
-    joinlines(b, (b.cursor.pos[1],b.cursor.pos[1]+1))
+
+function join_arg(b::Buffer)
+    n = parse_n(b.args)
+    joinlines(b, (b.cursor.pos[1],b.cursor.pos[1]+n))
+    after_normal(b)
 end
 function insert(b::Buffer)
-    b.mode = insert_mode
+    setmode(b,insert_mode)
     clamp(b, true)
 end
 function inserta(b::Buffer)
     b.cursor.pos[2] += 1
-    b.mode = insert_mode
-end
-
-function gogo(b::Buffer)
-    b.cursor.pos[1] = parse_n(b)
-    escape(b)
-    after_normal(b)
-end
-function gobottom(b::Buffer)
-    b.cursor.pos[1] = getheight(b)
-    escape(b)
-    after_normal(b)
+    setmode(b, insert_mode)
 end
 
 insertend(b::Buffer) = (move_eol(b); inserta(b))
 
 function enter_cmdmode(b::Buffer)
-    b.mode = command_mode
+    setmode(b,command_mode)
 end
-
-go_actions = Dict('g' => gogo,
-                  'G' => gobottom,
-                  '\e' => escape,
-                 )
-go_mode = Mode("go", go_actions)
 
 function go(b::Buffer)
-    b.mode = go_mode
+    setmode(b, go_mode)
 end
-
-function set_register(c)
-    function set(b)
-        b.state[:recording] = c
-        #This is a bad solution since it assumes all key presses are saved and never purged
-        b.state[:macroindex] = length(b.state[:actions])+1
-        escape(b)
-        b.state[:log] = "Recording to register $c"
-    end
-end
-
-register_record_mode = Mode("register macro", Action(set_register, x->true))
-
-function start_record(b::Buffer)
-    if !in(:recording, keys(b.state)) || b.state[:recording] == '\e'
-        b.mode = register_record_mode
-    else
-        b.state[:macros][b.state[:recording]] = join(b.state[:actions][b.state[:macroindex]:end-1])
-        b.state[:log] = b.state[:macros][b.state[:recording]]
-        b.state[:recording] = '\e'
-    end
-end
-
-#Macros can't refer to other macros with this solution, this produces two copies of the previous macro
-function replay_register(c)
-    function replay_macro(b::Buffer)
-        escape(b)
-        n = parse_n(b)
-        if in(c, keys(b.state[:macros]))
-            replay(b, b.state[:macros][c], n)
-        else
-            b.state[:log] = "No macro in register $c"
-        end
-    end
-end
-
-replay_mode = Mode("replay", Action(replay_register, x->true))
 
 function start_replay(b::Buffer)
-    b.mode = replay_mode
+    setmode(b, replay_mode)
+end
+
+function enter_deletemode(b::Buffer)
+    setmode(b, delete_mode)
 end
 
 normal_actions = Dict('h'  => move_left,
@@ -135,11 +93,13 @@ normal_actions = Dict('h'  => move_left,
                       '\e' => clear_arg,
                       ':'  => enter_cmdmode,
                       'x'  => delete_char,
-                      'J'  => joinone,
+                      'J'  => join_arg,
                       'g'  => go,
                       'G'  => gobottom,
                       'q'  => start_record,
                       '@'  => start_replay,
+                      'd'  => enter_deletemode,
+                      'Z'  => quit,
                      )
 
 normal_mode = Mode("normal", normal_actions)

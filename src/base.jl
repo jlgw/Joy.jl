@@ -1,15 +1,15 @@
-mutable struct Cursor
+struct Cursor
     pos
 end
 
-mutable struct Action
+struct Action
     getter
     permitted
 end
 
 Base.getindex(a::Action, n) = a.getter(n)
 
-mutable struct Mode
+struct Mode
     signature::String
     actions::Action
 end
@@ -25,19 +25,30 @@ function Mode(signature::String, d::Dict)
     Mode(signature, Action(f, x->in(x,keys(d))))
 end
 
-mutable struct Buffer
+struct Buffer
     term::Base.Terminals.TextTerminal
-    text
+    text::Array{String,1}
     cursor::Cursor
-    mode::Mode
-    state::Dict
-    args
+    mode::Array{Mode,1}
+    state::Dict{Symbol, String}
+    registers::Dict{Char, String}
+    args::Array{Char,1}
+end
+
+function settext(b::Buffer, text)
+    resize!(b.text, length(text))
+    b.text .= text
+end
+
+mode(b::Buffer) = b.mode[1]
+function setmode(b::Buffer, m::Mode)
+    b.mode[1] = m
 end
 
 function Base.show(io::IO, b::Buffer)
     print(io, "Buffer: ")
     print(io, "$(length(b.text)) lines ")
-    print(io, "$(b.mode.signature) ")
+    print(io, "$(mode(b).signature) ")
     print(io, "cursor position $(b.cursor.pos[1]),$(b.cursor.pos[2])")
 end
 
@@ -51,7 +62,8 @@ end
 
 function render(b::Buffer)
     clear_screen()
-    for l in b.text[b.state[:top]:min(end, b.state[:bottom])]
+    #Change parsing to something else
+    for l in b.text[top(b):min(end, bottom(b))]
         write(STDOUT, "$l  \n")
     end
     #Change hardcoded stuff
