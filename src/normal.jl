@@ -95,29 +95,32 @@ end
 
 register_record_mode = Mode("register macro", Action(set_register, x->true))
 
-function record(b::Buffer)
+function start_record(b::Buffer)
     if !in(:recording, keys(b.state)) || b.state[:recording] == '\e'
         b.mode = register_record_mode
     else
         b.state[:macros][b.state[:recording]] = join(b.state[:actions][b.state[:macroindex]:end-1])
         b.state[:log] = b.state[:macros][b.state[:recording]]
+        b.state[:recording] = '\e'
     end
 end
 
+#Macros can't refer to other macros with this solution, this produces two copies of the previous macro
 function replay_register(c)
     function replay_macro(b::Buffer)
+        escape(b)
+        n = parse_n(b)
         if in(c, keys(b.state[:macros]))
-            replay(b, b.state[:macros][c])
+            replay(b, b.state[:macros][c], n)
         else
             b.state[:log] = "No macro in register $c"
         end
-        escape(b)
     end
 end
 
 replay_mode = Mode("replay", Action(replay_register, x->true))
 
-function replay(b::Buffer)
+function start_replay(b::Buffer)
     b.mode = replay_mode
 end
 
@@ -135,8 +138,8 @@ normal_actions = Dict('h'  => move_left,
                       'J'  => joinone,
                       'g'  => go,
                       'G'  => gobottom,
-                      'q' => record,
-                      '@' => replay,
+                      'q'  => start_record,
+                      '@'  => start_replay,
                      )
 
 normal_mode = Mode("normal", normal_actions)

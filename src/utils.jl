@@ -50,12 +50,14 @@ function splitlines(b::Buffer, pos)
                    b.text[pos[1]+1:end]...]
 end
 
-function replay(b::Buffer, actions::String)
-    for c in actions
-        handle_raw(b, c)
+function replay(b::Buffer, actions::String, n=1)
+    for i in 1:n
+        for c in actions
+            handle_raw(b, c)
+        end
     end
 end
-replay(b::Buffer, s::Array{Char, 1}) = replay(b, join(s))
+replay(b::Buffer, s::Array{Char, 1}, n=1) = replay(b, join(s), n)
 
 function nmap(c::Char, s::String)
     normal_actions[c]= b -> replay(b, s)
