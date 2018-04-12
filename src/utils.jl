@@ -28,6 +28,20 @@ function escape(b::Buffer)
     clamp(b)
 end
 
+function findsymbol(s::String, c::Char, n::Integer)
+    p = findn([s...] .== c)
+    if n>length(p)
+        return 0
+    else
+        return p[n]
+    end
+end
+function findsymbol(b::Buffer, c::Char, pos, n::Integer)
+    pos[2] + findsymbol(line(b,pos[1])[pos[2]+1:end], c, n)
+end
+findsymbol(b::Buffer, c::Char, n::Integer) = findsymbol(b, c, pos(b), n)
+findsymbol(b::Buffer, c::Char) = findsymbol(b, c, parse_n(b))
+
 isint(c::Integer) = 47 < c < 58
 function parse_n(args::Array)
     n = length(args)

@@ -82,24 +82,33 @@ function enter_deletemode(b::Buffer)
     setmode(b, delete_mode)
 end
 
-normal_actions = Dict('h'  => move_left,
-                      'j'  => move_down,
-                      'k'  => move_up,
-                      'l'  => move_right,
-                      'i'  => insert,
-                      'a'  => inserta,
-                      '$'  => move_eol,
-                      'A'  => insertend,
-                      '\e' => clear_arg,
-                      ':'  => enter_cmdmode,
-                      'x'  => delete_char,
-                      'J'  => join_arg,
-                      'g'  => go,
-                      'G'  => gobottom,
-                      'q'  => start_record,
-                      '@'  => start_replay,
-                      'd'  => enter_deletemode,
-                      'Z'  => quit,
-                     )
+function enter_findmode(b::Buffer)
+    setmode(b, find_mode)
+end
+
+movements = Dict('h' => move_left,
+                 'j' => move_down,
+                 'k' => move_up,
+                 'l' => move_right,
+                 '$' => move_eol,
+                 'g' => go,
+                 'G' => gobottom,
+                 'f' => enter_findmode,
+                )
+
+normal_actions = merge(movements,
+                       Dict('i'  => insert,
+                            'a'  => inserta,
+                            'A'  => insertend,
+                            '\e' => clear_arg,
+                            ':'  => enter_cmdmode,
+                            'x'  => delete_char,
+                            'J'  => join_arg,
+                            'q'  => start_record,
+                            '@'  => start_replay,
+                            'd'  => enter_deletemode,
+                            'Z'  => quit,
+                           )
+                      )
 
 normal_mode = Mode("normal", normal_actions)

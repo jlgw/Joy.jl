@@ -3,3 +3,4 @@
 3. Global vars, find a better solution
 4. Word processing etc
 5. Wrapping lines
+6. Secondary mode - a mode that is switched back to once the primary mode is complete

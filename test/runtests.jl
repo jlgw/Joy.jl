@@ -9,6 +9,8 @@ orig = readlines("file")
 @test Joy.parse_n(['a','1', 'b', '1', 'c']) == 1
 @test Joy.parse_n(['a']) == 1
 @test Joy.parse_n([]) == 1
+@test Joy.findsymbol("Lorem ipsum dolor sit amet", 'i', 1) == 7
+@test Joy.findsymbol("Lorem ipsum dolor sit amet", 'i', 2) == 20
 
 buffer = Joy.self
 Joy.open("file", buffer)
@@ -18,3 +20,4 @@ Joy.replay(buffer, "2j")
 @test Joy.line(buffer) == orig[4]
 Joy.replay(buffer, "dd")
 @test Joy.line(buffer) == orig[5]
+Joy.replay(buffer, "gg")

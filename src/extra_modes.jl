@@ -58,6 +58,8 @@ end
 
 replay_mode = Mode("replay", Action(replay_register, x->true))
 
+#Delete mode
+
 function delete_lines(b::Buffer)
     n = parse_n(b.args)
     delete_lines(b, (y(b), y(b)+n-1))
@@ -68,3 +70,14 @@ delete_actions = Dict( 'd' => delete_lines,
                       '\e' => escape,
                      )
 delete_mode = Mode("delete", delete_actions)
+
+#Find char modes
+
+function find_action(c::Char)
+    function find(b::Buffer)
+        b.cursor.pos[2] = findsymbol(b::Buffer, c)
+        escape(b)
+    end
+end
+
+find_mode = Mode("find", Action(find_action, x->true))
