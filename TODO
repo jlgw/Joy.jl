@@ -1,0 +1,4 @@
+1. Julia-side macro that allows easier access to internal functions (not having to do self. etc)
+2. Startup laggy, find cause
+3. Global vars, find a better solution
+4. Word processing etc
