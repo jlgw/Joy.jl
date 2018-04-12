@@ -16,19 +16,19 @@ function after_normal(b::Buffer)
 end
 
 function move_left(b::Buffer)
-    b.cursor.pos[2] -= 1
+    b.cursor.pos[2] -= parse_n(b)
     after_normal(b)
 end
 function move_right(b::Buffer)
-    b.cursor.pos[2] += 1
+    b.cursor.pos[2] += parse_n(b)
     after_normal(b)
 end
 function move_up(b::Buffer)
-    b.cursor.pos[1] -= 1
+    b.cursor.pos[1] -= parse_n(b)
     after_normal(b)
 end
 function move_down(b::Buffer)
-    b.cursor.pos[1] += 1
+    b.cursor.pos[1] += parse_n(b)
     after_normal(b)
 end
 function move_eol(b::Buffer)

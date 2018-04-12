@@ -2,9 +2,11 @@
 function init(text)
     cursor = Cursor([1,1])
     state = Dict()
+    state[:actions] = []
     state[:running] = false 
     state[:console] = ""
     state[:command] = ""
+    state[:macros] = Dict()
     state[:log] = ""
     state[:top] = 1
     state[:bottom] = 30
@@ -21,6 +23,7 @@ function clamp(b::Buffer, edgecase=false)
 end
 
 function handle_raw(b::Buffer, c::Char)
+    push!(b.state[:actions], c)
     b.mode.actions[c](b)
     b.state[:console] = string(b.mode.signature,
                                " $(b.cursor.pos[1]),$(b.cursor.pos[2]) ",

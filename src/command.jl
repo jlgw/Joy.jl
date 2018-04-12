@@ -17,16 +17,15 @@ function evalcmd(b::Buffer)
         if b.state[:command][end] != ';'
             b.state[:log] = c
         end
+        b.state[:command] = ""
+        escape(b)
     catch
         b.state[:log] = "INVALID COMMAND"
     end
-    b.state[:command] = ""
-    escape(b)
 end
 
 function command_fn(c)
     function fn(b::Buffer)
-        #b.state[:log] = "$(Int(c))"
         if c=='\e'
             b.state[:command] = ""
             escape(b)

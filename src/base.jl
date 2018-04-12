@@ -55,5 +55,5 @@ function render(b::Buffer)
         write(STDOUT, "$l  \n")
     end
     #Change hardcoded stuff
-    write(STDOUT, string("~\n~\n~\n", b.state[:console], "  \n"))
+    write(STDOUT, string("~\n~\n", b.state[:console], "  \n"))
 end

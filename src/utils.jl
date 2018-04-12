@@ -11,6 +11,18 @@ function getwidth(b::Buffer)
     length(getline(b))
 end
 
+isint(c::Integer) = 48 < c < 57
+function parse_n(args::Array)
+    n = length(args)
+    il = args[indexin([false], isint.(Int.(args)))[1]+1:end]
+    if !isempty(il)
+        parse(Int, join(il))
+    else
+        return 1
+    end
+end
+parse_n(b::Buffer) = parse_n(b.args)
+
 function clear_arg(b::Buffer)
     b.args = []
 end
