@@ -10,9 +10,15 @@ function rmcmdchar(b::Buffer)
         escape(b)
     end
 end
-function evalcmd(b::Buffer)
+function evalcmd(b::Buffer, s::String)
     try
-        #rethink this
+        eval(Base.parse_input_line(s))
+    catch
+        "INVALID COMMAND"
+    end
+end
+function evalcmd(b::Buffer) 
+    try
         escape(b)
         c = eval(Base.parse_input_line(b.state[:command]))
         if b.state[:command][end] != ';'

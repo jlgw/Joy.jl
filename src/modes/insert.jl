@@ -7,10 +7,10 @@ function deleteback(b::Buffer)
     b.cursor.pos[2] -= 1
     if b.cursor.pos[2] >= 1
         deleteat(b, b.cursor.pos)
-    else
+    elseif y(b) > 1
         b.cursor.pos[1] -= 1
-        b.cursor.pos[2] = length(b.text[b.cursor.pos[1]])+1
-        joinlines(b, (b.cursor.pos[1], b.cursor.pos[1]+1))
+        b.cursor.pos[2] = width(b) + 1
+        joinlines(b, (y(b), y(b) + 1))
     end
 end
 function splitp(b::Buffer)

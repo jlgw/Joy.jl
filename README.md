@@ -34,12 +34,16 @@ julia> Joy.attach(buffer)
 
 vi-like movement
 
-<img src="movement.gif" style="width: 500px;"/>
+<img src="assets/movement.gif" style="width: 500px;"/>
 
 Command mode for evaluation of Julia expressions
 
-<img src="command.gif" style="width: 500px;"/>
+<img src="assets/command.gif" style="width: 500px;"/>
 
 Applying arbitrary Julia maps to the entire buffer
 
-<img src="mappings.gif" style="width: 500px;"/>
+<img src="assets/mappings.gif" style="width: 500px;"/>
+
+Editing/sourcing of its own configuration
+
+<img src="assets/bootstrap.gif" style="width: 500px;"/>

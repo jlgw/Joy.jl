@@ -4,3 +4,5 @@
 4. Word processing etc
 5. Wrapping lines
 6. Secondary mode - a mode that is switched back to once the primary mode is complete
+7. Empty files crash the editor
+8. Top/Bottom variables (in buffer.state dict) need to be more dynamic, maybe get information about the size of the terminal etc

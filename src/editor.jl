@@ -1,7 +1,9 @@
 #Some constructs shamelessly stolen from TerminalMenus
 
 #This needs to be reconsidered
-const self = init([""])
+if !isdefined(:self)
+    const self = init([""])
+end
 
 #Adds time to load, reduces time to open, should be replaced later
 handle_raw(self, 'j')
@@ -36,6 +38,7 @@ end
 #were defined without buffer as argument using the global self variable
 
 function open(st::String)
+    self.state[:filename] = st
     data = readlines(st)
     settext(self, data)
     #Change later
@@ -47,18 +50,38 @@ function open(st::String)
     self
 end
 
-function open(st, buffer::Buffer)
-    settext(buffer, readlines(st))
+function open(b::Buffer, st)
+    b.state[:filename] = st
+    settext(b, readlines(st))
 end
 
-function save(st, buffer::Buffer)
-    write(st, join(buffer.text, "\n"))
+function save(b::Buffer, st::String)
+    write(st, join(b.text, "\n"))
 end
-
-function save(st::String)
-    write(st, join(self.text, "\n"))
+function save(b::Buffer)
+    if in(:filename, keys(b.state))
+        save(b, b.state[:filename])
+    else
+        "No file name"
+    end
 end
+save(st::String) = save(self, st)
+save() = save(self)
 
 function quit()
     quit(self)
 end
+
+#Just for vi muscle memory
+struct Save
+end
+Base.show(io::IO, s::Save) = save()
+(s::Save)() = save()
+
+struct Quit
+end
+Base.show(io::IO, q::Quit) = quit()
+(q::Quit)() = quit()
+
+w = Save()
+q = Quit()
