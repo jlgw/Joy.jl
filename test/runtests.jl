@@ -21,3 +21,11 @@ Joy.replay(buffer, "2j")
 Joy.replay(buffer, "dd")
 @test Joy.line(buffer) == orig[5]
 Joy.replay(buffer, "gg")
+Joy.replay(buffer, "i\r\r\e")
+Joy.replay(buffer, "kia\e")
+@test Joy.line(buffer) == "a"
+cmd = ":settext(self, map(z->\"\$z \"*line(self, z), 1:height(self)))\r"
+Joy.replay(buffer, cmd)
+Joy.replay(buffer, "12gg")
+@test Joy.line(buffer)[1:2] == "12"
+
