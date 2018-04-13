@@ -60,11 +60,14 @@ function move_sys_cursor(row,col)
     write(STDOUT, "\e[$(row);$(col)H");
 end
 
+function render_line(b::Buffer, l::String)
+    write(STDOUT, "$l  \n")
+end
 function render(b::Buffer)
     clear_screen()
     #Change parsing to something else
     for l in b.text[top(b):min(end, bottom(b))]
-        write(STDOUT, "$l  \n")
+        render_line(b, l)
     end
     #Change hardcoded stuff
     write(STDOUT, string("~\n~\n", b.state[:console], "  \n"))
