@@ -20,7 +20,7 @@ go_mode = Mode("go", go_actions)
 #Macro modes
 
 function set_register(c)
-    cv = ""*c
+    cv = string(c)
     function set(b)
         b.state[:recording] = cv
         #This is a bad solution since it assumes all key presses are saved and never purged

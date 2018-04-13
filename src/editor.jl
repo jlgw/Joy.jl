@@ -62,4 +62,3 @@ end
 function quit()
     quit(self)
 end
-q = quit

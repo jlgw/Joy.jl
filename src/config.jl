@@ -16,16 +16,11 @@ function init(text)
     return buffer
 end
 
-function clamp(b::Buffer, edgecase=false)
-    y,x = b.cursor.pos
-    y = b.cursor.pos[1] = Base.clamp(y, 1, length(b.text))
-    x = b.cursor.pos[2] = Base.clamp(x, 1, length(b.text[y])+edgecase)
-end
-
 function handle_raw(b::Buffer, c::Char)
-    b.state[:actions] = b.state[:actions]*c
+    b.state[:actions] = string(b.state[:actions], c)
     mode(b).actions[c](b)
+    xp = (x(b)>0 ? xs(b) : "0-1")
     b.state[:console] = string(mode(b).signature,
-                               " $(b.cursor.pos[1]),$(b.cursor.pos[2]) ",
+                               " ",ys(b), ",", xp, " ",
                                join(b.args, ""), "\n", b.state[:log])
 end

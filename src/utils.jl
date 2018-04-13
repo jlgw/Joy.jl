@@ -28,6 +28,15 @@ function escape(b::Buffer)
     clamp(b)
 end
 
+function clamp(b::Buffer, edgecase=false)
+    b.cursor.pos[1] = Base.clamp(y(b), 1, height(b))
+    if width(b) > 0
+        b.cursor.pos[2] = Base.clamp(x(b), 1, width(b)+edgecase)
+    else
+        b.cursor.pos[2] = 0
+    end
+end
+
 function findsymbol(s::String, c::Char, n::Integer)
     p = findn([s...] .== c)
     if n>length(p)
@@ -79,7 +88,7 @@ end
 
 function splitlines(b::Buffer, pos)
     settext(b, [b.text[1:pos[1]-1]...; 
-                [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][pos[2]:end]];
+                [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][max(1, pos[2]):end]];
                 b.text[pos[1]+1:end]...])
 end
 

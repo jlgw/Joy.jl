@@ -57,7 +57,9 @@ function join_arg(b::Buffer)
 end
 function insert(b::Buffer)
     setmode(b,insert_mode)
-    clamp(b, true)
+    if x(b) == 0
+        b.cursor.pos[2] = 1
+    end
 end
 function inserta(b::Buffer)
     b.cursor.pos[2] += 1
