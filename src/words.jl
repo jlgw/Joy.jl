@@ -11,7 +11,7 @@ crs(b::Buffer, r::Regex, n::Integer) = crs(line(b, n), r)
 function next_pos(s::String, r::Regex, n=1)
     c = collect(eachmatch(r, s))
     if length(c)>=n
-        return c[n].offset
+        return ind2chr(s, c[n].offset)
     else
         return -1
     end

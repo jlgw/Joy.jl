@@ -11,8 +11,8 @@ orig = readlines("file")
     @test Joy.parse_n([]) == 1
 end
 @testset "Find symbol" begin
-    @test Joy.findsymbol("Lorem ipsum dolor sit amet", 'i', 1) == 7
-    @test Joy.findsymbol("Lorem ipsum dolor sit amet", 'i', 2) == 20
+    @test Joy.findsymbol("Lörem ipsum dolor sit amet", 'i', 1) == 7
+    @test Joy.findsymbol("Lörem ipsum dolor sit amet", 'i', 2) == 20
 end
 
 buffer = Joy.self
@@ -36,9 +36,9 @@ Joy.open(buffer, "file")
 end
 
 @testset "Word handling" begin
-    @test Joy.nextword_pos("Lorem ipsum dolor sit amet", 2) == 7
-    @test Joy.nextword_pos(" Lorem ipsum dolor sit amet") == 2
-    @test Joy.nextword_pos("Lorem ipsum dolor sit amet", 4) == 19
+    @test Joy.nextword_pos("Lörem ipsum dolor sit amet", 2) == 7
+    @test Joy.nextword_pos(" Lörem ipsum dolor sit amet") == 2
+    @test Joy.nextword_pos("Lörem ipsum dolor sit amet", 4) == 19
     @test Joy.nextword_pos("(", 2) == -1
     Joy.open(buffer, "file")
     Joy.replay(buffer, "99k99h")
