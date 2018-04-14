@@ -4,6 +4,18 @@ y(b::Buffer)    = b.cursor.pos[1]
 ys(b::Buffer)   = "$(y(b))"
 x(b::Buffer)    = b.cursor.pos[2]
 xs(b::Buffer)   = "$(x(b))"
+xu(b::Buffer)   = c2ic(line(b), x(b))
+posu(b::Buffer) = [y(b), xu(b)]
+
+function c2ic(s, n)
+    if n<1
+        return 0
+    elseif n>length(s)
+        return sizeof(s)+1
+    else
+        return chr2ind(s, n)
+    end
+end
 
 top(b::Buffer) = parse(Int64, b.state[:top])
 bottom(b::Buffer) = parse(Int64, b.state[:bottom])
@@ -48,7 +60,7 @@ end
 function findsymbol(b::Buffer, c::Char, pos, n::Integer)
     pos[2] + findsymbol(line(b,pos[1])[pos[2]+1:end], c, n)
 end
-findsymbol(b::Buffer, c::Char, n::Integer) = findsymbol(b, c, pos(b), n)
+findsymbol(b::Buffer, c::Char, n::Integer) = findsymbol(b, c, posu(b), n)
 findsymbol(b::Buffer, c::Char) = findsymbol(b, c, parse_n(b))
 
 isint(c::Integer) = 47 < c < 58
@@ -67,14 +79,19 @@ function clear_arg(b::Buffer)
     resize!(b.args,0)
 end
 
-function deleteat(b::Buffer, pos)
+function deleteat(b::Buffer, pos, n)
     pr = b.text[pos[1]]
-    n = parse_n(b)
-    b.text[pos[1]] = string(pr[1:pos[2]-1], pr[pos[2]+n:end])
+    b.text[pos[1]] = string(pr[1:min(c2ic(pr, pos[2])-1, end)],
+                            pr[max(1, c2ic(pr, pos[2]+n)):end])
 end
 
 function paste(b::Buffer, pos, s::String)
-    setline(b, pos[1], line(b, pos[1])[1:pos[2]-1]*s*line(b, pos[1])[pos[2]:end])
+    setline(b, 
+            pos[1], 
+            string( (ln -> ln[1:min(c2ic(ln, pos[2])-1, end)])(line(b, pos[1])),
+                   s,
+                   ln -> ln[max(1, c2ic(ln, pos[2])):end])(line(b, pos[1])),
+           )
 end
 paste(b::Buffer, s) = paste(b, pos(b), s)
 pastea(b::Buffer, s) = paste(b, pos(b)+[0,1], s)

@@ -1,12 +1,15 @@
 function insertat(b::Buffer, c::Char, pos)
     pr = b.text[pos[1]]
-    b.text[pos[1]] = string(pr[1:min(pos[2]-1, end)], c, pr[max(1,pos[2]):end])
+    b.text[pos[1]] = string(pr[1:min(c2ic(pr, pos[2]-1),end)],
+                            c,
+                            pr[max(1,c2ic(pr, pos[2])):end],
+                           )
 end
 
 function deleteback(b::Buffer)
     b.cursor.pos[2] -= 1
     if b.cursor.pos[2] >= 1
-        deleteat(b, b.cursor.pos)
+        deleteat(b, b.cursor.pos, 1)
     elseif y(b) > 1
         b.cursor.pos[1] -= 1
         b.cursor.pos[2] = width(b) + 1

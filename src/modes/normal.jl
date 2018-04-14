@@ -46,7 +46,7 @@ function move_bol(b::Buffer)
 end
 
 function delete_char(b::Buffer)
-    deleteat(b, b.cursor.pos)
+    deleteat(b, b.cursor.pos, parse_n(b))
     after_normal(b)
 end
 
