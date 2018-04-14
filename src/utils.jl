@@ -109,8 +109,11 @@ replay(b::Buffer, s::Array{Char, 1}, n=1) = replay(b, join(s), n)
 
 source(b::Buffer) = evalcmd(b, join(b.text, '\n'))
 
+function nmap(c::Char, f)
+    normal_actions[c] = f
+end
 function nmap(c::Char, s::String)
-    normal_actions[c]= b -> replay(b, s)
+    normal_actions[c] = b -> replay(b, s)
 end
 
 function quit(b::Buffer)

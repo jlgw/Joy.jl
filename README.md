@@ -47,3 +47,7 @@ Applying arbitrary Julia maps to the entire buffer
 Editing/sourcing of its own configuration
 
 <img src="assets/bootstrap.gif" style="width: 500px;"/>
+
+On-the-fly custom word types
+
+<img src="assets/customwords.gif" style="width: 500px;"/>

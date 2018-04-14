@@ -2,6 +2,7 @@ module Joy
 
 include("base.jl")
 include("utils.jl")
+include("words.jl")
 
 include("modes/normal.jl")
 include("modes/insert.jl")

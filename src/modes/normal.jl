@@ -66,6 +66,29 @@ function inserta(b::Buffer)
     setmode(b, insert_mode)
 end
 
+#Caution: This doesn't work the same as it does in vim
+#In vim, an empty line is included with w but not e, these are different operators
+#Here, we treat the e operation as a combination of e and an eow call
+function move_word(b::Buffer)
+    n = parse_n(b.args)+1
+    move_to_nth_word(b, n)
+    after_normal(b)
+end
+function move_eow(b::Buffer)
+    n = parse_n(b.args)+1
+    move_to_nth_eow(b, n)
+    after_normal(b)
+end
+
+function move_Word(b::Buffer)
+    move_to_nth_Word(b)
+    after_normal(b)
+end
+function move_eoW(b::Buffer)
+    move_to_nth_eoW(b)
+    after_normal(b)
+end
+
 insertend(b::Buffer) = (move_eol(b); inserta(b))
 
 function enter_cmdmode(b::Buffer)
@@ -96,6 +119,10 @@ movements = Dict('h' => move_left,
                  'g' => go,
                  'G' => gobottom,
                  'f' => enter_findmode,
+                 'w' => move_word,
+                 'e' => move_eow,
+                 'W' => move_Word,
+                 'E' => move_eoW,
                 )
 
 normal_actions = merge(movements,
