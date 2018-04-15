@@ -79,6 +79,16 @@ function move_eow(b::Buffer)
     move_to_nth_eow(b, n)
     after_normal(b)
 end
+function back_word(b::Buffer)
+    n = parse_n(b.args)+1
+    back_to_nth_word(b, n)
+    after_normal(b)
+end
+function back_eow(b::Buffer)
+    n = parse_n(b.args)+1
+    back_to_nth_eow(b, n)
+    after_normal(b)
+end
 
 function move_Word(b::Buffer)
     move_to_nth_Word(b)
@@ -88,6 +98,15 @@ function move_eoW(b::Buffer)
     move_to_nth_eoW(b)
     after_normal(b)
 end
+function back_Word(b::Buffer)
+    back_to_nth_Word(b)
+    after_normal(b)
+end
+function back_eoW(b::Buffer)
+    back_to_nth_eoW(b)
+    after_normal(b)
+end
+
 
 insertend(b::Buffer) = (move_eol(b); inserta(b))
 
@@ -121,8 +140,10 @@ movements = Dict('h' => move_left,
                  'f' => enter_findmode,
                  'w' => move_word,
                  'e' => move_eow,
+                 'b' => back_eow,
                  'W' => move_Word,
                  'E' => move_eoW,
+                 'B' => back_eoW,
                 )
 
 normal_actions = merge(movements,
