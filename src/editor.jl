@@ -9,28 +9,32 @@ end
 handle_raw(self, 'j')
 handle_raw(self, 'k')
 
-function attach(buffer::Buffer)
-    buffer.state[:running] = "true"
-    Base.REPL.raw!(buffer.term, true)
+function run(b::Buffer)
+    b.state[:log] = ""
+    r = read(STDIN, Char)
+    handle_raw(b, r)
     move_sys_cursor(1,1)
-    render(buffer)
-    move_sys_cursor(1,1)
-    while buffer.state[:running]=="true"
-        buffer.state[:log] = ""
-        r = read(STDIN, Char)
-        handle_raw(buffer, r)
-        move_sys_cursor(1,1)
-        render(buffer)
-        if mode(buffer)==command_mode
-            write(STDOUT, string(":", buffer.state[:command]))
-        else
-            move_sys_cursor(buffer.cursor.pos[1]-top(buffer)+1, buffer.cursor.pos[2])
-        end
+    render(b)
+    if mode(b)==command_mode
+        write(STDOUT, string(":", b.state[:command]))
+    else
+        move_sys_cursor(b.cursor.pos[1]-top(b)+1, b.cursor.pos[2])
     end
-    finalize(buffer)
-    buffer
 end
-function finalize(buffer::Buffer)
+
+function attach(b::Buffer)
+    b.state[:running] = "true"
+    Base.REPL.raw!(b.term, true)
+    move_sys_cursor(1,1)
+    render(b)
+    move_sys_cursor(1,1)
+    while b.state[:running]=="true"
+        Base.invokelatest(run, b)
+    end
+    finalize(b)
+    b
+end
+function finalize(b::Buffer)
     clear_screen()
 end
 

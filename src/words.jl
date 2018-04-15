@@ -10,8 +10,12 @@ crs(b::Buffer, r::Regex, n::Integer) = crs(line(b, n), r)
 #it may be necessary, num arg word movement should be very fast
 function next_pos(s::String, r::Regex, n=1)
     c = collect(eachmatch(r, s))
-    if length(c)>=n
-        return ind2chr(s, c[n].offset)
+    if length(c)>=n 
+        if length(s)>1
+            return ind2chr(s, c[n].offset)
+        else
+            return 1
+        end
     else
         return -1
     end
@@ -26,12 +30,9 @@ function next_pos_naive(b::Buffer, r::Regex, n=1)
         wc = cumsum(crs.(b.text[y(b)+1:end], r))
         yoffset = findfirst(x->x>n, lf+wc)
         mc = n - lf
-        b.state[:yo] = "$yoffset"
         if yoffset>1
             mc -= wc[yoffset-1]
         end
-        b.state[:mc] = "$mc"
-        b.state[:lf] = "$lf"
         if mc==0
             xoffset = next_pos(line(b, y(b)+yoffset), r, 1)
         else
