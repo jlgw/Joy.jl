@@ -6,7 +6,7 @@
 
 [![codecov.io](http://codecov.io/github/lancebeet/Joy.jl/coverage.svg?branch=master)](http://codecov.io/github/lancebeet/Joy.jl?branch=master)
 
-Joy is a modal line-based text editor written in Julia. This is a toy project; it is not a full-fledged text editor and parts of the foundation still need to be thought out. The goal of the project is a modal editor implemented and extensible in Julia.
+Joy is a modal line-based text editor written in Julia. This is a toy project; it is not a full-fledged text editor and parts of the foundation still need to be thought out. The goal of the project is a modal editor that is both implemented and extensible in Julia.
 
 ## How to install
 ```julia
@@ -30,6 +30,11 @@ To save:
 Reattaching to an existing buffer from the REPL:
 ```julia
 julia> Joy.attach(buffer)
+```
+
+To edit files directly from the command line, add the following to your shell config file (.bashrc, .profile etc):
+```bash
+function joy() { julia -e "using Joy; Joy.open(\"$1\")"; }
 ```
 
 vi-like movement

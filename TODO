@@ -1,8 +1,14 @@
-1. Julia-side macro that allows easier access to internal functions (not having to do self. etc)
-2. Startup laggy, find cause - Kind of solved
-3. Global vars, find a better solution
-4. Word processing etc
-5. Wrapping lines
-6. Secondary mode - a mode that is switched back to once the primary mode is complete
-7. Empty files crash the editor
-8. Top/Bottom variables (in buffer.state dict) need to be more dynamic, maybe get information about the size of the terminal etc
+1.  Julia-side macro that allows easier access to internal functions (not having to do self. etc)
+2.  Startup laggy, find cause - Kind of solved
+3.  Global vars, find a better solution
+4.  Wrapping lines
+5.  Secondary mode - a mode that is switched back to once the primary mode is complete, or something similar (This would solve the dw, dj etc problem)
+6.  Empty files crash the editor, need handling of y-index = 0
+7.  Top/Bottom variables (in buffer.state dict) need to be more dynamic, maybe get information about the size of the terminal etc
+8.  Better register recall/assignment, keybinding for paste function
+9.  Easier access of buffer state: maybe forwarding getindex(buffer,...) -> getindex(buffer.state,...), perhaps with symbols to access buffer.registers
+10. Numeric states/registers/vars container to avoid parsing but maintaining narrow typing of state dict
+11. Julia specific default functionality: Syntax highlighting, Word/Latex completion in insert/command mode
+12. Easy to use constructors for new modes with some default functionality (escaping, insert type modes etc)
+13. Docstrings
+14. The method next_pos_naive calculates the word length of all following lines in the buffer. This would of course be unnecessarily slow when editing a large document. Regarding words/Words every line is at least one w/W, so the numerical argument is the upper bound for the number of lines to check.

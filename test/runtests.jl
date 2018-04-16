@@ -46,5 +46,11 @@ end
     @test Joy.line(buffer)[Joy.x(buffer):Joy.x(buffer)+2] == "sit"
     Joy.replay(buffer, "50hW")
     @test Joy.line(buffer)[Joy.x(buffer):Joy.x(buffer)+4] == "ipsum"
+    Joy.replay(buffer, "j10w")
+    @test Joy.line(buffer) == ""
+    Joy.replay(buffer, "e")
+    @test Joy.line(buffer)[Joy.x(buffer)] == 't'
+    Joy.replay(buffer, "bb")
+    @test Joy.line(buffer)[Joy.x(buffer)] == 'a'
 end
 

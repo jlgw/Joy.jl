@@ -1,5 +1,5 @@
 #Switch argument order? Convention is buffer first, but that conflicts with julia praxis
-#This may not be identical to vi(m)
+#This is not be identical to vi(m)
 const Word = r"\S+|^\s$|^$"
 const word = r"[\pL\pN_]+|[\pS\pP]+|^\s+$|^$"
 
@@ -20,8 +20,12 @@ function next_pos(s::String, r::Regex, n=1)
         return -1
     end
 end
+
 function next_pos_naive(b::Buffer, r::Regex, n=1)
     s = line(b)[max(x(b),1):end]
+    if next_pos(s, r, 1) == 1
+        n += 1
+    end
     m = next_pos(s, r, n)
     if m!=-1
         return pos(b).+[0,m-1]
@@ -36,7 +40,12 @@ function next_pos_naive(b::Buffer, r::Regex, n=1)
         if mc==0
             xoffset = next_pos(line(b, y(b)+yoffset), r, 1)
         else
-            xoffset = next_pos(line(b, y(b)+yoffset), r, mc)
+            #Pretty clumsy solution
+            if next_pos(line(b, y(b)+yoffset), r, 1)!=1
+                xoffset = next_pos(line(b, y(b)+yoffset), r, mc)
+            else
+                xoffset = next_pos(line(b, y(b)+yoffset), r, mc+1)
+            end
         end
         return [y(b)+yoffset, xoffset]
     end
@@ -44,6 +53,9 @@ end
 
 function prev_pos_naive(b::Buffer, r::Regex, n=1)
     s = line(b)[min(x(b),end):-1:1]
+    if next_pos(s, r, 1) == 1
+        n += 1
+    end
     m = next_pos(s, r, n)
     if m!=-1
         return pos(b).-[0,m-1]
@@ -58,7 +70,12 @@ function prev_pos_naive(b::Buffer, r::Regex, n=1)
         if mc==0
             xoffset = next_pos(reverse(line(b, y(b)-yoffset)), r, 1)
         else
-            xoffset = next_pos(reverse(line(b, y(b)-yoffset)), r, mc)
+            #Pretty clumsy solution
+            if next_pos(line(b, y(b)+yoffset), r, 1)!=1
+                xoffset = next_pos(line(b, y(b)+yoffset), r, mc)
+            else
+                xoffset = next_pos(line(b, y(b)+yoffset), r, mc+1)
+            end
         end
         return [y(b)-yoffset, length(line(b, y(b)-yoffset)) - xoffset]
     end

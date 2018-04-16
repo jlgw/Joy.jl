@@ -70,36 +70,39 @@ end
 #In vim, an empty line is included with w but not e, these are different operators
 #Here, we treat the e operation as a combination of e and an eow call
 function move_word(b::Buffer)
-    n = parse_n(b.args)+1
+    n = parse_n(b.args)
     move_to_nth_word(b, n)
     after_normal(b)
 end
 function move_eow(b::Buffer)
-    n = parse_n(b.args)+1
+    n = parse_n(b.args)
     move_to_nth_eow(b, n)
     after_normal(b)
 end
 function back_word(b::Buffer)
-    n = parse_n(b.args)+1
+    n = parse_n(b.args)
     back_to_nth_word(b, n)
     after_normal(b)
 end
 function back_eow(b::Buffer)
-    n = parse_n(b.args)+1
+    n = parse_n(b.args)
     back_to_nth_eow(b, n)
     after_normal(b)
 end
 
 function move_Word(b::Buffer)
-    move_to_nth_Word(b)
+    n = parse_n(b.args)
+    move_to_nth_Word(b, n)
     after_normal(b)
 end
 function move_eoW(b::Buffer)
-    move_to_nth_eoW(b)
+    n = parse_n(b.args)
+    move_to_nth_eoW(b, n)
     after_normal(b)
 end
 function back_Word(b::Buffer)
-    back_to_nth_Word(b)
+    n = parse_n(b.args)
+    back_to_nth_Word(b, n)
     after_normal(b)
 end
 function back_eoW(b::Buffer)
