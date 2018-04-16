@@ -88,9 +88,10 @@ end
 function paste(b::Buffer, pos, s::String)
     setline(b, 
             pos[1], 
-            string( (ln -> ln[1:min(c2ic(ln, pos[2])-1, end)])(line(b, pos[1])),
+            string((ln -> ln[1:min(c2ic(ln, pos[2])-1, end)])(line(b, pos[1])),
                    s,
-                   ln -> ln[max(1, c2ic(ln, pos[2])):end])(line(b, pos[1])),
+                   (ln -> ln[max(1, c2ic(ln, pos[2])):end])(line(b, pos[1])),
+                  )
            )
 end
 paste(b::Buffer, s) = paste(b, pos(b), s)

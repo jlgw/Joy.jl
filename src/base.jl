@@ -26,7 +26,6 @@ function Mode(signature::String, d::Dict)
 end
 
 struct Buffer
-    term::Base.Terminals.TextTerminal
     text::Array{String,1}
     cursor::Cursor
     mode::Array{Mode,1}

@@ -8,6 +8,7 @@ end
 #Adds time to load, reduces time to open, should be replaced later
 handle_raw(self, 'j')
 handle_raw(self, 'k')
+handle_raw(self, 'w')
 
 function run(b::Buffer)
     b.state[:log] = ""
@@ -23,8 +24,9 @@ function run(b::Buffer)
 end
 
 function attach(b::Buffer)
+    term = Base.REPL.Terminals.TTYTerminal(get(ENV, "TERM", "dumb"), STDIN, STDOUT, STDERR)
+    Base.REPL.raw!(term, true)
     b.state[:running] = "true"
-    Base.REPL.raw!(b.term, true)
     move_sys_cursor(1,1)
     render(b)
     move_sys_cursor(1,1)
@@ -36,6 +38,8 @@ function attach(b::Buffer)
 end
 function finalize(b::Buffer)
     clear_screen()
+    term = Base.REPL.Terminals.TTYTerminal(get(ENV, "TERM", "dumb"), STDIN, STDOUT, STDERR)
+    Base.REPL.raw!(term, false)
 end
 
 #It would be nice if we had a macro so that all functions that take ::Buffer as argument
