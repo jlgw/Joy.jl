@@ -61,8 +61,18 @@ end
     @test buffer.text[1][1] == orig[1][2]
     Joy.replay(buffer, "2dw")
     @test buffer.text[1][1] == orig[1][14]
-    # A little trickier
+    # A little trickier - delete with find mode not supported currently
     #Joy.replay(buffer, "dfc")
     #@test buffer.text[1][1] == 'o'
 end
 
+@testset "Yank/Paste" begin
+    Joy.replay(buffer, "99k99h")
+    Joy.settext(buffer, ["c", "c"])
+    Joy.paste(buffer, [1,1], "a\nb")
+    @test buffer.text == ["ca", "b", "c"]
+    Joy.settext(buffer, ["Lorem", "ipsum"])
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "\"ayw")
+    @test buffer.registers['a'] == "Lorem\n"
+end
