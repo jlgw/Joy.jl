@@ -36,6 +36,7 @@ To edit files directly from the command line, add the following to your shell co
 ```bash
 function joy() { julia -e "using Joy; Joy.open(\"$1\")"; }
 ```
+Implemented features so far: Basic motions (stepping, word movements, find char, EOL, end/beginning of file), insert mode (with before/after/EOL init) deleting/yanking/pasting with custom registers and arbitrary motions, command mode (very primitive), macro record/recall to custom registers, constructors for custom regex word movement functions.
 
 vi-like movement
 
