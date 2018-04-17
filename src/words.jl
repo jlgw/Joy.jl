@@ -105,7 +105,7 @@ function move_to_nth_eom(b::Buffer, r::Regex, n)
 end
 
 function back_to_nth_eom(b::Buffer, r::Regex, n)
-    if bom(b, r)>1
+    if -bom(b, r)>1
         b.cursor.pos[2] += bom(b, r) + 1
         n -= 1
     end
@@ -121,10 +121,10 @@ function move_ops(r::Regex)
     prev_pos_naive_r(b::Buffer, n=1)  = prev_pos_naive(b, r, n)
     eom_r(o::Union{Buffer, String}) = eom(o, r)
     bom_r(o::Union{Buffer, String}) = bom(o, r)
-    move_to_nth_r(b::Buffer, n=parse_n(b)+1) = move_to_nth(b, r, n)
-    move_to_nth_eom_r(b::Buffer, n=parse_n(b)+1) = move_to_nth_eom(b, r, n)
-    back_to_nth_r(b::Buffer, n=parse_n(b)+1) = back_to_nth(b, r, n)
-    back_to_nth_eom_r(b::Buffer, n=parse_n(b)+1) = back_to_nth_eom(b, r, n)
+    move_to_nth_r(b::Buffer, n=parse_n(b)) = move_to_nth(b, r, n)
+    move_to_nth_eom_r(b::Buffer, n=parse_n(b)) = move_to_nth_eom(b, r, n)
+    back_to_nth_r(b::Buffer, n=parse_n(b)) = back_to_nth(b, r, n)
+    back_to_nth_eom_r(b::Buffer, n=parse_n(b)) = back_to_nth_eom(b, r, n)
     [crs_r,
      next_pos_r,
      next_pos_naive_r,

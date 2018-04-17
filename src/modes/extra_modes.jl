@@ -3,12 +3,7 @@
 function gogo(b::Buffer)
     b.cursor.pos[1] = parse_n(b)
     escape(b)
-    after_normal(b)
-end
-function gobottom(b::Buffer)
-    b.cursor.pos[1] = height(b)
-    escape(b)
-    after_normal(b)
+    after_normal(b) #keep this for now
 end
 
 go_actions = Dict('g' => gogo,
@@ -60,15 +55,24 @@ replay_mode = Mode("replay", Action(replay_register, x->true))
 
 #Delete mode
 
+function after_delete(b::Buffer)
+    p1 = [parse(b.state[:dy]), parse(b.state[:dx])]
+    p2 = pos(b)
+    delete_between(b, p1, p2)
+    clear_arg(b)
+    escape(b)
+end
+
 function delete_lines(b::Buffer)
     n = parse_n(b.args)
     delete_lines(b, (y(b), y(b)+n-1))
     escape(b)
 end
 
-delete_actions = Dict( 'd' => delete_lines,
+delete_extras = Dict( 'd' => delete_lines,
                       '\e' => escape,
                      )
+delete_actions = merge(movements, delete_extras)
 delete_mode = Mode("delete", delete_actions)
 
 #Find char modes

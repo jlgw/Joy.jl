@@ -20,40 +20,15 @@ function after_normal(b::Buffer)
     set_boundaries(b)
 end
 
-function move_left(b::Buffer)
-    b.cursor.pos[2] -= parse_n(b)
-    after_normal(b)
-end
-function move_right(b::Buffer)
-    b.cursor.pos[2] += parse_n(b)
-    after_normal(b)
-end
-function move_up(b::Buffer)
-    b.cursor.pos[1] -= parse_n(b)
-    after_normal(b)
-end
-function move_down(b::Buffer)
-    b.cursor.pos[1] += parse_n(b)
-    after_normal(b)
-end
-function move_eol(b::Buffer)
-    b.cursor.pos[2] = width(b)
-    clear_arg(b)
-end
-function move_bol(b::Buffer)
-    b.cursor.pos[2] = 1
-    clear_arg(b)
-end
-
 function delete_char(b::Buffer)
     deleteat(b, b.cursor.pos, parse_n(b))
-    after_normal(b)
+    after(b)
 end
 
 function join_arg(b::Buffer)
     n = parse_n(b.args)
     joinlines(b, (b.cursor.pos[1],b.cursor.pos[1]+n))
-    after_normal(b)
+    after(b)
 end
 function insert(b::Buffer)
     setmode(b,insert_mode)
@@ -66,59 +41,10 @@ function inserta(b::Buffer)
     setmode(b, insert_mode)
 end
 
-#Caution: This doesn't work the same as it does in vim
-#In vim, an empty line is included with w but not e, these are different operators
-#Here, we treat the e operation as a combination of e and an eow call
-function move_word(b::Buffer)
-    n = parse_n(b.args)
-    move_to_nth_word(b, n)
-    after_normal(b)
-end
-function move_eow(b::Buffer)
-    n = parse_n(b.args)
-    move_to_nth_eow(b, n)
-    after_normal(b)
-end
-function back_word(b::Buffer)
-    n = parse_n(b.args)
-    back_to_nth_word(b, n)
-    after_normal(b)
-end
-function back_eow(b::Buffer)
-    n = parse_n(b.args)
-    back_to_nth_eow(b, n)
-    after_normal(b)
-end
-
-function move_Word(b::Buffer)
-    n = parse_n(b.args)
-    move_to_nth_Word(b, n)
-    after_normal(b)
-end
-function move_eoW(b::Buffer)
-    n = parse_n(b.args)
-    move_to_nth_eoW(b, n)
-    after_normal(b)
-end
-function back_Word(b::Buffer)
-    n = parse_n(b.args)
-    back_to_nth_Word(b, n)
-    after_normal(b)
-end
-function back_eoW(b::Buffer)
-    back_to_nth_eoW(b)
-    after_normal(b)
-end
-
-
 insertend(b::Buffer) = (move_eol(b); inserta(b))
 
 function enter_cmdmode(b::Buffer)
     setmode(b,command_mode)
-end
-
-function go(b::Buffer)
-    setmode(b, go_mode)
 end
 
 function start_replay(b::Buffer)
@@ -126,28 +52,13 @@ function start_replay(b::Buffer)
 end
 
 function enter_deletemode(b::Buffer)
+    #This should be in a before() function
+    #Also unsure if this is a good way of storing vars
+    b.state[:dx] = xs(b)
+    b.state[:dy] = ys(b)
     setmode(b, delete_mode)
 end
 
-function enter_findmode(b::Buffer)
-    setmode(b, find_mode)
-end
-
-movements = Dict('h' => move_left,
-                 'j' => move_down,
-                 'k' => move_up,
-                 'l' => move_right,
-                 '$' => move_eol,
-                 'g' => go,
-                 'G' => gobottom,
-                 'f' => enter_findmode,
-                 'w' => move_word,
-                 'e' => move_eow,
-                 'b' => back_eow,
-                 'W' => move_Word,
-                 'E' => move_eoW,
-                 'B' => back_eoW,
-                )
 
 normal_actions = merge(movements,
                        Dict('i'  => insert,

@@ -17,6 +17,16 @@ function c2ic(s, n)
     end
 end
 
+function after(b::Buffer)
+    if mode(b)==normal_mode
+        after_normal(b)
+    elseif mode(b)==insert_mode
+        after_insert(b)
+    elseif mode(b)==delete_mode
+        after_delete(b)
+    end
+end
+
 top(b::Buffer) = parse(Int64, b.state[:top])
 bottom(b::Buffer) = parse(Int64, b.state[:bottom])
 function height(b::Buffer)
@@ -73,7 +83,9 @@ function parse_n(args::Array)
         return 1
     end
 end
-parse_n(b::Buffer) = parse_n(b.args)
+function parse_n(b::Buffer) 
+    parse_n(b.args)
+end
 
 function clear_arg(b::Buffer)
     resize!(b.args,0)
@@ -114,6 +126,19 @@ function delete_lines(b::Buffer, interval::Tuple)
     #settext is slow in this context, we can make this more efficient
     settext(b, [b.text[1:interval[1]-1]...; 
                 b.text[interval[2]+1:end]...])
+end
+
+#Caution: Doesn't work exactly like vim (line delete etc)
+function delete_between(b::Buffer, pos1, pos2)
+    if (pos1[1] < pos2[1]) || ((pos1[1] == pos2[1]) && (pos1[2] < pos2[2]))
+        sp, ep = pos1, pos2
+    else
+        sp, ep = pos2, pos1
+    end
+    settext(b, [b.text[1:sp[1]-1]...;
+                string(b.text[sp[1]][1:sp[2]-1], b.text[ep[1]][ep[2]:end]);
+                b.text[ep[1]+1:end]...])
+    b.cursor.pos .= sp
 end
 
 function replay(b::Buffer, actions::String, n=1)
