@@ -40,8 +40,11 @@ function inserta(b::Buffer)
     b.cursor.pos[2] += 1
     setmode(b, insert_mode)
 end
-
-insertend(b::Buffer) = (move_eol(b); inserta(b))
+function insert_beginning(b::Buffer) #different from vim on white non-empty lines
+    b.cursor.pos[2] = nextword_pos(line(b), 1)
+    insert(b)
+end
+insert_end(b::Buffer) = (move_eol(b); inserta(b))
 
 function enter_cmdmode(b::Buffer)
     setmode(b,command_mode)
@@ -84,7 +87,8 @@ end
 normal_actions = merge(movements,
                        Dict('i'  => insert,
                             'a'  => inserta,
-                            'A'  => insertend,
+                            'I'  => insert_beginning,
+                            'A'  => insert_end,
                             '\e' => clear_arg,
                             ':'  => enter_cmdmode,
                             'x'  => delete_char,
