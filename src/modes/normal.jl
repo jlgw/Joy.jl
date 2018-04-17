@@ -54,12 +54,33 @@ end
 function enter_deletemode(b::Buffer)
     #This should be in a before() function
     #Also unsure if this is a good way of storing vars
-    b.state[:dx] = xs(b)
-    b.state[:dy] = ys(b)
+    b.state[:lx] = xs(b)
+    b.state[:ly] = ys(b)
     setmode(b, delete_mode)
 end
 
+function enter_yankmode(b::Buffer)
+    #This should be in a before() function
+    #Also unsure if this is a good way of storing vars
+    b.state[:lx] = xs(b)
+    b.state[:ly] = ys(b)
+    setmode(b, yank_mode)
+end
 
+function enter_registermode(b::Buffer)
+    setmode(b, register_clipboardmode )
+end
+
+function pastea_register(b::Buffer)
+    s = b.state[:register][1]
+    pastea(b, s)
+    b.state[:register] = "\""
+end
+function paste_register(b::Buffer)
+    s = b.state[:register][1]
+    paste(b, s)
+    b.state[:register] = "\""
+end
 normal_actions = merge(movements,
                        Dict('i'  => insert,
                             'a'  => inserta,
@@ -71,6 +92,10 @@ normal_actions = merge(movements,
                             'q'  => start_record,
                             '@'  => start_replay,
                             'd'  => enter_deletemode,
+                            'y'  => enter_yankmode,
+                            '"'  => enter_registermode,
+                            'p'  => pastea_register,
+                            'P'  => paste_register,
                             'Z'  => quit,
                            )
                       )

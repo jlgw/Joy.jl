@@ -1,6 +1,6 @@
 #Switch argument order? Convention is buffer first, but that conflicts with julia praxis
 #This is not be identical to vi(m)
-const Word = r"\S+|^\s$|^$"
+const Word = r"\S+|^\s+$|^$"
 const word = r"[\pL\pN_]+|[\pS\pP]+|^\s+$|^$"
 
 crs(s::String, r::Regex) = length(matchall(r, s))
@@ -21,8 +21,10 @@ function next_pos(s::String, r::Regex, n=1)
     end
 end
 
+next_pos(b::Buffer, r::Regex, n=1) = next_pos(line(b)[c2ic(line(b), max(x(b),1)):end],
+                                              r, n)
 function next_pos_naive(b::Buffer, r::Regex, n=1)
-    s = line(b)[max(x(b),1):end]
+    s = line(b)[c2ic(line(b), max(x(b),1)):end]
     if next_pos(s, r, 1) == 1
         n += 1
     end

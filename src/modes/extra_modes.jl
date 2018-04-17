@@ -14,7 +14,7 @@ go_mode = Mode("go", go_actions)
 
 #Macro modes
 
-function set_register(c)
+function set_record_register(c)
     cv = string(c)
     function set(b)
         b.state[:recording] = cv
@@ -25,11 +25,11 @@ function set_register(c)
     end
 end
 
-register_record_mode = Mode("register macro", Action(set_register, x->true))
+register_recordmode = Mode("register macro", Action(set_record_register, x->true))
 
 function start_record(b::Buffer)
     if !in(:recording, keys(b.state)) || b.state[:recording] == "\e"
-        setmode(b, register_record_mode)
+        setmode(b, register_recordmode)
     else
         b.registers[b.state[:recording][1]] = join(b.state[:actions][parse(b.state[:macroindex]):end-1])
         b.state[:log] = "Finished recording to register $(b.state[:recording])"
@@ -56,14 +56,16 @@ replay_mode = Mode("replay", Action(replay_register, x->true))
 #Delete mode
 
 function after_delete(b::Buffer)
-    p1 = [parse(b.state[:dy]), parse(b.state[:dx])]
+    p1 = [parse(b.state[:ly]), parse(b.state[:lx])]
     p2 = pos(b)
-    delete_between(b, p1, p2)
+    delete_between(b, p1, p2, b.state[:register][1])
     clear_arg(b)
+    b.state[:register] = "\""
     escape(b)
 end
 
 function delete_lines(b::Buffer)
+    #We need a yank here
     n = parse_n(b.args)
     delete_lines(b, (y(b), y(b)+n-1))
     escape(b)
@@ -75,6 +77,39 @@ delete_extras = Dict( 'd' => delete_lines,
 delete_actions = merge(movements, delete_extras)
 delete_mode = Mode("delete", delete_actions)
 
+function after_yank(b::Buffer)
+    p1 = [parse(b.state[:ly]), parse(b.state[:lx])]
+    p2 = pos(b)
+    yank_between(b, p1, p2, b.state[:register][1])
+    b.cursor.pos .= p1
+    clear_arg(b)
+    b.state[:register] = "\""
+    escape(b)
+end
+
+function yank_lines(b::Buffer)
+    n = parse_n(b.args)
+    yank_lines(b, (y(b), y(b)+n-1))
+    escape(b)
+end
+
+yank_extras = Dict( 'y' => yank_lines,
+                      '\e' => escape,
+                     )
+yank_actions = merge(movements, yank_extras)
+yank_mode = Mode("yank", yank_actions)
+
+#bug or not? it does not reset the state[:register] if a non-yank/paste operation
+#is performed, but we can reset it in the after procedures, not sure if there's a difference
+function set_clipboard_register(c)
+    cv = string(c)
+    function set(b)
+        b.state[:register] = cv
+        escape(b)
+    end
+end
+
+register_clipboardmode = Mode("register", Action(set_clipboard_register, x->true))
 #Find char modes
 
 function find_action(c::Char)

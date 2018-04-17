@@ -2,10 +2,10 @@
 2.  Startup laggy, find cause - Kind of solved
 3.  Global vars, find a better solution
 4.  Wrapping lines
-5.  Secondary mode - a mode that is switched back to once the primary mode is complete, or something similar (This would solve the dw, dj etc problem)
+5.  Secondary mode - a mode that is switched back to once the primary mode is complete, or something similar (This would solve the dfx etc problem)
 6.  Empty files crash the editor, need handling of y-index = 0
-7.  Top/Bottom variables (in buffer.state dict) need to be more dynamic, maybe get information about the size of the terminal etc
-8.  Better register recall/assignment, keybinding for paste function
+7.  yanking/pasting/deleting over empty registers is buggy because of c2ic, it would be nice to get rid of c2ic and replace it with something better everywhere
+8.  Top/Bottom variables (in buffer.state dict) need to be more dynamic, maybe get information about the size of the terminal etc
 9.  Easier access of buffer state: maybe forwarding getindex(buffer,...) -> getindex(buffer.state,...), perhaps with symbols to access buffer.registers
 10. Numeric states/registers/vars container to avoid parsing but maintaining narrow typing of state dict
 11. Julia specific default functionality: Syntax highlighting, Word/Latex completion in insert/command mode

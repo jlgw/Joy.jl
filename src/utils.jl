@@ -7,7 +7,7 @@ xs(b::Buffer)   = "$(x(b))"
 xu(b::Buffer)   = c2ic(line(b), x(b))
 posu(b::Buffer) = [y(b), xu(b)]
 
-function c2ic(s, n)
+function c2ic(s::String, n::Integer)
     if n<1
         return 0
     elseif n>length(s)
@@ -24,6 +24,8 @@ function after(b::Buffer)
         after_insert(b)
     elseif mode(b)==delete_mode
         after_delete(b)
+    elseif mode(b)==yank_mode
+        after_yank(b)
     end
 end
 
@@ -97,7 +99,7 @@ function deleteat(b::Buffer, pos, n)
                             pr[max(1, c2ic(pr, pos[2]+n)):end])
 end
 
-function paste(b::Buffer, pos, s::String)
+function paste_single(b::Buffer, pos, s::String)
     setline(b, 
             pos[1], 
             string((ln -> ln[1:min(c2ic(ln, pos[2])-1, end)])(line(b, pos[1])),
@@ -106,41 +108,81 @@ function paste(b::Buffer, pos, s::String)
                   )
            )
 end
+function paste(b::Buffer, pos, s::String)
+    s_array = split(s, '\n')
+    if length(s_array) == 1
+        paste_single(b::Buffer, pos, s)
+    else
+        settext(b, [b.text[1:pos[1]-1];
+                    [string(
+                            (t->t[1:c2ic(t, pos[2])])(b.text[pos[1]]),
+                            s_array[1])];
+                    s_array[2:end-1];
+                    [string(
+                            s_array[end],
+                            (t->t[c2ic(t, pos[2]+1):end])(b.text[pos[1]]))];
+                    b.text[pos[1]+1:end]
+                   ])
+    end
+end
+function paste(b::Buffer, pos, c::Char)
+    if c in keys(b.registers)
+        paste(b, pos, b.registers[c])
+    else
+        self.state[:log] = "Register $c empty"
+    end
+end
 paste(b::Buffer, s) = paste(b, pos(b), s)
-pastea(b::Buffer, s) = paste(b, pos(b)+[0,1], s)
+pastea(b::Buffer, s) = paste(b, pos(b)+[0, 1], s)
 
 function joinlines(b::Buffer, interval::Tuple, delimiter=" ")
     #settext is slow in this context, we can make this more efficient
-    settext(b, [b.text[1:interval[1]-1]...; 
-                join(b.text[interval[1]:min(end, interval[2])]);
-                b.text[interval[2]+1:end]...])
+    settext(b, [b.text[1:interval[1]-1];
+                [join(b.text[interval[1]:min(end, interval[2])])];
+                b.text[interval[2]+1:end]])
 end
 
 function splitlines(b::Buffer, pos)
-    settext(b, [b.text[1:pos[1]-1]...; 
+    settext(b, [b.text[1:pos[1]-1]; 
                 [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][max(1, pos[2]):end]];
-                b.text[pos[1]+1:end]...])
+                b.text[pos[1]+1:end]])
 end
 
 function delete_lines(b::Buffer, interval::Tuple)
     #settext is slow in this context, we can make this more efficient
-    settext(b, [b.text[1:interval[1]-1]...; 
-                b.text[interval[2]+1:end]...])
+    settext(b, [b.text[1:interval[1]-1]; 
+                b.text[interval[2]+1:end]])
+end
+
+function order_pos(pos1, pos2)
+    if (pos1[1] < pos2[1]) || ((pos1[1] == pos2[1]) && (pos1[2] < pos2[2]))
+        return (pos1, pos2)
+    else
+        return (pos2, pos1)
+    end
 end
 
 #Caution: Doesn't work exactly like vim (line delete etc)
-function delete_between(b::Buffer, pos1, pos2)
-    if (pos1[1] < pos2[1]) || ((pos1[1] == pos2[1]) && (pos1[2] < pos2[2]))
-        sp, ep = pos1, pos2
-    else
-        sp, ep = pos2, pos1
-    end
-    settext(b, [b.text[1:sp[1]-1]...;
-                string(b.text[sp[1]][1:sp[2]-1], b.text[ep[1]][ep[2]:end]);
-                b.text[ep[1]+1:end]...])
+function delete_between(b::Buffer, pos1, pos2, reg='"')
+    #no unicode support for this right now
+    sp, ep = order_pos(pos1, pos2)
+    yank_between(b::Buffer, sp, ep, reg)
+    settext(b, [b.text[1:sp[1]-1];
+                [string(b.text[sp[1]][1:sp[2]-1], b.text[ep[1]][ep[2]:end])];
+                b.text[ep[1]+1:end]])
     b.cursor.pos .= sp
 end
 
+function yank_between(b::Buffer, pos1, pos2, reg='"')
+    sp, ep = order_pos(pos1, pos2)
+    if sp[1] == ep[1]
+        b.registers[reg] = string(b.text[sp[1]][sp[2]:ep[2]-1])
+    else
+        b.registers[reg] = join([b.text[sp[1]][sp[2]:end];
+                                b.text[sp[1]+1:ep[1]-1];
+                                b.text[ep[1]][1:ep[2]-1]], '\n')
+    end
+end
 function replay(b::Buffer, actions::String, n=1)
     for i in 1:n
         for c in actions

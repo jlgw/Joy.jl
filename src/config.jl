@@ -4,6 +4,7 @@ function init(text)
     state = Dict(:actions => "")
     state[:running] = "false"
     state[:console] = ""
+    state[:register] = "\""
     state[:command] = ""
     state[:log] = ""
     state[:top] = "1"
