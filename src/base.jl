@@ -60,7 +60,7 @@ function move_sys_cursor(row,col)
 end
 
 function render_line(b::Buffer, l::String)
-    write(STDOUT, "$l  \n")
+    write(STDOUT, "$l \n")
 end
 function render(b::Buffer)
     clear_screen()

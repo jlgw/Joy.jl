@@ -74,6 +74,10 @@ function enter_registermode(b::Buffer)
     setmode(b, register_clipboardmode )
 end
 
+function enter_replacemode(b::Buffer)
+    setmode(b, replace_mode)
+end
+
 function pastea_register(b::Buffer)
     s = b.state[:register][1]
     pastea(b, s)
@@ -92,6 +96,7 @@ normal_actions = merge(movements,
                             '\e' => clear_arg,
                             ':'  => enter_cmdmode,
                             'x'  => delete_char,
+                            'r'  => enter_replacemode,
                             'J'  => join_arg,
                             'q'  => start_record,
                             '@'  => start_replay,

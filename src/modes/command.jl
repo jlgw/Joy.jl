@@ -17,6 +17,11 @@ function evalcmd(b::Buffer, s::String)
         "INVALID COMMAND"
     end
 end
+function previous_cmd(b::Buffer)
+    cmds = split(b.state[:cmdhistory], '\n')
+    b.state[:command] = cmds[max(1,parse(b.state[:cmd]))] #This stuff isn't super
+    b.state[:cmd] = "$(parse(b.state[:cmd])-1)"
+end
 function evalcmd(b::Buffer) 
     try
         escape(b)
@@ -24,7 +29,10 @@ function evalcmd(b::Buffer)
         if b.state[:command][end] != ';'
             b.state[:log] = "$c"
         end
+        b.state[:cmdhistory] *= "\n"*b.state[:command]
         b.state[:command] = ""
+        b.state[:cmds] = "$(parse(b.state[:cmds])+1)"
+        b.state[:cmd] = b.state[:cmds]
     catch
         b.state[:log] = "INVALID COMMAND"
         setmode(b, command_mode)
@@ -40,6 +48,9 @@ function command_fn(c)
             rmcmdchar(b)
         elseif c=='\r'
             evalcmd(b)
+        elseif c=='\v'
+            self.state[:log] = "working"
+            previous_cmd(b)
         else 
             addcmdchar(b, c)
         end

@@ -26,6 +26,12 @@ function after(b::Buffer)
         after_delete(b)
     elseif mode(b)==yank_mode
         after_yank(b)
+    elseif mode(b)==find_mode
+        after_find(b)
+    elseif mode(b)==go_mode
+        after_go(b)
+    elseif mode(b)==replace_mode
+        #after_replace(b)
     end
 end
 
@@ -193,6 +199,22 @@ end
 replay(b::Buffer, s::Array{Char, 1}, n=1) = replay(b, join(s), n)
 
 source(b::Buffer) = evalcmd(b, join(b.text, '\n'))
+
+function reconfigure(b)
+    pkdir = Pkg.Dir.path("Joy")
+    files = ["include(\"$pkdir/src/base.jl\")",
+     "include(\"$pkdir/src/utils.jl\")",
+     "include(\"$pkdir/src/words.jl\")",
+     "include(\"$pkdir/src/modes/movements.jl\")",
+     "include(\"$pkdir/src/modes/normal.jl\")",
+     "include(\"$pkdir/src/modes/insert.jl\")",
+     "include(\"$pkdir/src/modes/command.jl\")",
+     "include(\"$pkdir/src/config.jl\")",
+     "include(\"$pkdir/src/editor.jl\")",
+    ]
+    (f -> evalcmd(b, f)).(files)
+end
+    
 
 function nmap(c::Char, f)
     normal_actions[c] = f

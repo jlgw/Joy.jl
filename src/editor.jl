@@ -5,11 +5,6 @@ if !isdefined(:self)
     const self = init([""])
 end
 
-#Adds time to load, reduces time to open, should be replaced later
-handle_raw(self, 'j')
-handle_raw(self, 'k')
-handle_raw(self, 'w')
-
 function run(b::Buffer)
     b.state[:log] = ""
     r = read(STDIN, Char)
@@ -91,5 +86,6 @@ end
 Base.show(io::IO, q::Quit) = quit()
 (q::Quit)() = quit()
 
-w = Save()
-q = Quit()
+w = Save();
+q = Quit(); #Pretty amusing bug - reloading this file without the ; exits the editor since show() is called on q
+1

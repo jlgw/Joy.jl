@@ -1,9 +1,14 @@
 #Go mode
 
+function after_go(b::Buffer)
+    b.mode[1] = b.mode[2]
+    after(b)
+end
+
 function gogo(b::Buffer)
     b.cursor.pos[1] = parse_n(b)
+    after(b) 
     escape(b)
-    after_normal(b) #keep this for now
 end
 
 go_actions = Dict('g' => gogo,
@@ -112,11 +117,36 @@ end
 register_clipboardmode = Mode("register", Action(set_clipboard_register, x->true))
 #Find char modes
 
+#This doesn't quite work as intended with delete, the sensible approach in vim is to remove the last
+# character as well (dtc is used for exlucive delete until)
+function after_find(b::Buffer)
+    b.mode[1] = b.mode[2]
+    after(b)
+end
+
 function find_action(c::Char)
     function find(b::Buffer)
         b.cursor.pos[2] = findsymbol(b::Buffer, c)
-        escape(b)
+        after(b)
     end
 end
 
 find_mode = Mode("find", Action(find_action, x->true))
+
+function replace_action(c)
+    function replace(b::Buffer)
+        if c=='\e'
+            escape(b)
+        elseif c=='\x7f'
+            escape(b)
+        elseif c=='\r'
+            deleteat(b, pos(b), 1)
+            splitp(b)
+            escape(b)
+        else 
+            setline(b, string(line(b)[1:x(b)-1], c, line(b)[x(b)+1:end]))  #Warning: Unicode might not work here
+            escape(b)
+        end
+    end
+end
+replace_mode = Mode("replace", Action(replace_action, x->true))

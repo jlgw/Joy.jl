@@ -6,13 +6,16 @@ function init(text)
     state[:console] = ""
     state[:register] = "\""
     state[:command] = ""
+    state[:cmdhistory] = ""
+    state[:cmd] = "0"
+    state[:cmds] = "0"
     state[:log] = ""
     state[:top] = "1"
     state[:bottom] = "19"
     registers = Dict{Char, String}()
     buffer = Buffer(text, 
                     cursor, 
-                    [normal_mode], 
+                    [normal_mode, normal_mode], 
                     state, 
                     registers, 
                     Array{Char, 1}())

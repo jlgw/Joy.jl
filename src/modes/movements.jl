@@ -24,15 +24,17 @@ function move_bol(b::Buffer)
 end
 
 function go(b::Buffer)
+    b.mode[2] = b.mode[1]
     setmode(b, go_mode)
 end
 function gobottom(b::Buffer)
     b.cursor.pos[1] = height(b)
+    after(b) 
     escape(b)
-    after_normal(b) #Keep this for now
 end
 
 function enter_findmode(b::Buffer)
+    b.mode[2] = b.mode[1]
     setmode(b, find_mode)
 end
 

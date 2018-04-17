@@ -9,7 +9,7 @@ end
 function deleteback(b::Buffer)
     b.cursor.pos[2] -= 1
     if b.cursor.pos[2] >= 1
-        deleteat(b, b.cursor.pos, 1)
+        deleteat(b, pos(b), 1)
     elseif y(b) > 1
         b.cursor.pos[1] -= 1
         b.cursor.pos[2] = width(b) + 1
