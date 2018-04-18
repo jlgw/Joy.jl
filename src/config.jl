@@ -5,14 +5,8 @@ function init(text)
     state[:running] = "false"
     state[:console] = ""
     state[:register] = "\""
-    state[:command] = ""
-    state[:cmdhistory] = ""
-    state[:cmd] = "0"
-    state[:cmds] = "0"
-    state[:search] = ""
-    state[:searchhistory] = ""
-    state[:searchind] = "0"
-    state[:searches] = "0"
+    init_call(state, :command)
+    init_call(state, :search)
     state[:log] = ""
     state[:top] = "1"
     state[:bottom] = "19"

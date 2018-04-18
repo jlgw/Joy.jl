@@ -3,22 +3,6 @@ function after_search(b::Buffer)
     after(b)
 end
 
-function addsearchchar(b::Buffer, c)
-    b.state[:search] = string(b.state[:search], c)
-end
-function rmsearchchar(b::Buffer)
-    if length(b.state[:search]) >= 1
-        b.state[:search] = b.state[:search][1:end-1]
-    else
-        escape(b)
-    end
-end
-
-function previous_search(b::Buffer)
-    searches = split(b.state[:searches], '\n')
-    b.state[:search] = searches[max(1,parse(b.state[:searchind]))] #This stuff isn't super
-    b.state[:searchind] = "$(parse(b.state[:searchind])-1)"
-end
 function search(b::Buffer)
     #This can be done faster for (very) large files,
     #also, no support for regex search
@@ -36,25 +20,10 @@ function search(b::Buffer)
     else
         b.state[:log] = "NOT FOUND"
     end
-    b.state[:searchhistory] *= "\n"*b.state[:search]
-    b.state[:searches] = "$(parse(b.state[:searches])+1)"
-    b.state[:searchind] = b.state[:searches]
+    b.state[:search_history] *= "\n"*b.state[:search]
+    b.state[:search_n] = "$(parse(b.state[:search_n])+1)"
+    b.state[:search_ind] = b.state[:search_n]
 end
 
-function search_fn(c)
-    function fn(b::Buffer)
-        if c=='\e'
-            escape(b)
-        elseif c=='\x7f'
-            rmsearchchar(b)
-        elseif c=='\r'
-            search(b) #?
-        elseif c=='\v'
-            previous_search(b)
-        else 
-            addsearchchar(b, c)
-        end
-    end
-end
-
+search_fn(c) = exec_fn(c, :search, search)
 search_mode = Mode("search", Action(search_fn, x->true))

@@ -6,6 +6,7 @@ include("words.jl")
 include("modes/movements.jl")
 include("modes/normal.jl")
 include("modes/insert.jl")
+include("modes/calls.jl")
 include("modes/command.jl")
 include("modes/search.jl")
 

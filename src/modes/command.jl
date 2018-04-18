@@ -1,26 +1,11 @@
 # It would be cool if this were an actual REPL with completion etc
 
-function addcmdchar(b::Buffer, c)
-    b.state[:command] = string(b.state[:command], c)
-end
-function rmcmdchar(b::Buffer)
-    if length(b.state[:command]) >= 1
-        b.state[:command] = b.state[:command][1:end-1]
-    else
-        escape(b)
-    end
-end
 function evalcmd(b::Buffer, s::String)
     try
         eval(Base.parse_input_line(s))
     catch
         "INVALID COMMAND"
     end
-end
-function previous_cmd(b::Buffer)
-    cmds = split(b.state[:cmdhistory], '\n')
-    b.state[:command] = cmds[max(1,parse(b.state[:cmd]))] #This stuff isn't super
-    b.state[:cmd] = "$(parse(b.state[:cmd])-1)"
 end
 function evalcmd(b::Buffer) 
     try
@@ -29,32 +14,15 @@ function evalcmd(b::Buffer)
         if b.state[:command][end] != ';'
             b.state[:log] = "$c"
         end
-        b.state[:cmdhistory] *= "\n"*b.state[:command]
+        b.state[:command_history] *= "\n"*b.state[:command]
         b.state[:command] = ""
-        b.state[:cmds] = "$(parse(b.state[:cmds])+1)"
-        b.state[:cmd] = b.state[:cmds]
+        b.state[:command_n] = "$(parse(b.state[:command_n])+1)"
+        b.state[:command_ind] = b.state[:command_n]
     catch
         b.state[:log] = "INVALID COMMAND"
         setmode(b, command_mode)
     end
 end
 
-function command_fn(c)
-    function fn(b::Buffer)
-        if c=='\e'
-            b.state[:command] = ""
-            escape(b)
-        elseif c=='\x7f'
-            rmcmdchar(b)
-        elseif c=='\r'
-            evalcmd(b)
-        elseif c=='\v'
-            self.state[:log] = "working"
-            previous_cmd(b)
-        else 
-            addcmdchar(b, c)
-        end
-    end
-end
-
+command_fn(c) = exec_fn(c, :command, evalcmd)
 command_mode = Mode("command", Action(command_fn, x->true))
