@@ -10,6 +10,8 @@ function init(text)
     state[:log] = ""
     state[:top] = "1"
     state[:bottom] = "19"
+    state[:left] = "0"
+    state[:right] = "80"
     registers = Dict{Char, String}()
     buffer = Buffer(text, 
                     cursor, 

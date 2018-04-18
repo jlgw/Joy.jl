@@ -16,7 +16,7 @@ function run(b::Buffer)
     elseif mode(b)==search_mode
         write(STDOUT, string("/", b.state[:search]))
     else
-        move_sys_cursor(b.cursor.pos[1]-top(b)+1, b.cursor.pos[2])
+        move_sys_cursor(b.cursor.pos[1]-top(b)+1, b.cursor.pos[2]-left(b)+1)
     end
 end
 

@@ -60,14 +60,19 @@ function move_sys_cursor(row,col)
 end
 
 function render_line(b::Buffer, l::String)
-    write(STDOUT, "$l \n")
+    s = Base.clamp(left(b), 1, max(1,length(l)))
+    f = Base.clamp(right(b), 1, length(l))
+    displ = l[s:f]
+    write(STDOUT, "$displ \n")
 end
+
 function render(b::Buffer)
     clear_screen()
     #Change parsing to something else
-    for l in b.text[top(b):min(end, bottom(b))]
+    for l in b.text[max(1,top(b)):min(end, bottom(b))]
         render_line(b, l)
     end
     #Change hardcoded stuff
-    write(STDOUT, string("~\n~\n", b.state[:console], "  \n"))
+    tildes = max(0, top(b)-length(b.text))
+    write(STDOUT, string("~\n"^tildes, b.state[:console], "  \n"))
 end

@@ -39,6 +39,8 @@ end
 
 top(b::Buffer) = parse(Int64, b.state[:top])
 bottom(b::Buffer) = parse(Int64, b.state[:bottom])
+left(b::Buffer) = parse(Int64, b.state[:left])
+right(b::Buffer) = parse(Int64, b.state[:right])
 function height(b::Buffer)
     length(b.text)
 end
