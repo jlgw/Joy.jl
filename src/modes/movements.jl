@@ -44,6 +44,10 @@ function enter_searchmode(b::Buffer)
     setmode(b, search_mode)
 end
 
+function next(b::Buffer)
+    search(b)
+end
+
 #Caution: This doesn't work the same as it does in vim
 #In vim, an empty line is included with w but not e, these are different operators
 #Here, we treat the e operation as a combination of e and an eow call
@@ -98,6 +102,7 @@ movements = Dict('h' => move_left,
                  'G' => gobottom,
                  'f' => enter_findmode,
                  '/' => enter_searchmode,
+                 'n' => next,
                  'w' => move_word,
                  'e' => move_eow,
                  'b' => back_eow,

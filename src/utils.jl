@@ -216,7 +216,6 @@ function reconfigure(b)
     ]
     (f -> evalcmd(b, f)).(files)
 end
-    
 
 function nmap(c::Char, f)
     normal_actions[c] = f

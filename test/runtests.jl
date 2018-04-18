@@ -88,4 +88,9 @@ end
     @test buffer.text == ["Lorem2 ipsum2"]
     Joy.replay(buffer, "y/ipsum2\r")
     @test buffer.registers['"'] == "Lorem2 "
+    Joy.settext(buffer, ["Lorem ipsum", "Lorem2 ipsum2"])
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "/ipsum\r")
+    Joy.replay(buffer, "n")
+    @test Joy.pos(buffer) == [2,8]
 end

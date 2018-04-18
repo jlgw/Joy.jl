@@ -19,7 +19,7 @@ function previous_search(b::Buffer)
     b.state[:search] = searches[max(1,parse(b.state[:searchind]))] #This stuff isn't super
     b.state[:searchind] = "$(parse(b.state[:searchind])-1)"
 end
-function search(b::Buffer) 
+function search(b::Buffer)
     #This can be done faster for (very) large files,
     #also, no support for regex search
     txt = [b.text[y(b)][x(b)+1:end];
