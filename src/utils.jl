@@ -28,6 +28,8 @@ function after(b::Buffer)
         after_yank(b)
     elseif mode(b)==find_mode
         after_find(b)
+    elseif mode(b)==search_mode
+        after_search(b)
     elseif mode(b)==go_mode
         after_go(b)
     elseif mode(b)==replace_mode

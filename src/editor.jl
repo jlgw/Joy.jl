@@ -13,6 +13,8 @@ function run(b::Buffer)
     render(b)
     if mode(b)==command_mode
         write(STDOUT, string(":", b.state[:command]))
+    elseif mode(b)==search_mode
+        write(STDOUT, string("/", b.state[:search]))
     else
         move_sys_cursor(b.cursor.pos[1]-top(b)+1, b.cursor.pos[2])
     end
