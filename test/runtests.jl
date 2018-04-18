@@ -76,4 +76,16 @@ end
     Joy.replay(buffer, "\"ayw")
     @test buffer.registers['a'] == "Lorem\n"
 end
-
+@testset "Search" begin
+    Joy.replay(buffer, "99k99h")
+    Joy.settext(buffer, ["Lorem ipsum", "Lorem2 ipsum2"])
+    Joy.replay(buffer, "/ipsum\r")
+    @test Joy.pos(buffer) == [1,7]
+    Joy.replay(buffer, "/ipsum2\r")
+    @test Joy.pos(buffer) == [2,8]
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "d/Lorem2\r")
+    @test buffer.text == ["Lorem2 ipsum2"]
+    Joy.replay(buffer, "y/ipsum2\r")
+    @test buffer.registers['"'] == "Lorem2 "
+end
