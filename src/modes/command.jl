@@ -14,12 +14,13 @@ function evalcmd(b::Buffer)
         if b.state[:command][end] != ';'
             b.state[:log] = "$c"
         end
-        b.state[:command_history] *= "\n"*b.state[:command]
+        b.state[:command_history] *= b.state[:command]*"\n"
         b.state[:command] = ""
-        b.state[:command_n] = "$(parse(b.state[:command_n])+1)"
-        b.state[:command_ind] = b.state[:command_n]
-    catch
-        b.state[:log] = "INVALID COMMAND"
+        command_n = parse(b.state[:command_n])
+        b.state[:command_n] = "$(command_n+1)"
+        b.state[:command_ind] = "$(b.state[:command_n])"
+    catch y
+        b.state[:log] = "INVALID COMMAND: $y"
         setmode(b, command_mode)
     end
 end

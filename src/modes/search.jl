@@ -6,7 +6,7 @@ end
 function search(b::Buffer)
     #This can be done faster for (very) large files,
     #also, no support for regex search
-    txt = [b.text[y(b)][x(b)+1:end];
+    txt = [unirange(b.text[y(b)], x(b)+1:length(b.text[y(b)]));
            b.text[y(b)+1:end]]
 
     inds = Base.search.(txt, b.state[:search])

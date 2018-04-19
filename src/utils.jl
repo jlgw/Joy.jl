@@ -4,9 +4,37 @@ y(b::Buffer)    = b.cursor.pos[1]
 ys(b::Buffer)   = "$(y(b))"
 x(b::Buffer)    = b.cursor.pos[2]
 xs(b::Buffer)   = "$(x(b))"
-xu(b::Buffer)   = c2ic(line(b), x(b))
+xu(b::Buffer)   = chr2ind(line(b), x(b))
 posu(b::Buffer) = [y(b), xu(b)]
 
+chr2ind(s::String, n::Integer) = Base.chr2ind(s, n)
+function chr2ind(s::String, range::Range)
+    if length(s) == 0 || length(range) == 0
+        return 0:-1
+    else
+        ec = chr2ind(s, range.stop)
+        sc = chr2ind(s, range.start)
+        if step(range)>0
+            sc:step(range):(ec+sizeof(s[ec:ec])-1)
+        else
+            sc+sizeof(s[sc:sc])-1:step(range):ec
+        end
+    end
+end
+function unirange(s::String, range::Range)
+    if length(s) == 0 || length(range) == 0
+        ""
+    elseif step(range) == 1
+        r = chr2ind(s, range)
+        s[r.start:r.stop]
+    elseif step(range) == -1
+        s = reverse(s)
+        r = chr2ind(s, length(s)-range+1)
+        s[r.start:r.stop]
+    else
+        error("Only single step range permitted")
+    end
+end
 function c2ic(s::String, n::Integer)
     if n<1
         return 0
@@ -16,6 +44,7 @@ function c2ic(s::String, n::Integer)
         return chr2ind(s, n)
     end
 end
+
 
 function after(b::Buffer)
     if mode(b)==normal_mode
@@ -105,16 +134,15 @@ end
 
 function deleteat(b::Buffer, pos, n)
     pr = b.text[pos[1]]
-    b.text[pos[1]] = string(pr[1:min(c2ic(pr, pos[2])-1, end)],
-                            pr[max(1, c2ic(pr, pos[2]+n)):end])
+    b.text[pos[1]] = string(unirange(pr, 1:pos[2]-1), unirange(pr, pos[2]+n:length(pr)))
 end
 
 function paste_single(b::Buffer, pos, s::String)
     setline(b, 
             pos[1], 
-            string((ln -> ln[1:min(c2ic(ln, pos[2])-1, end)])(line(b, pos[1])),
+            string((ln -> unirange(ln, 1:pos[2]-1))(line(b, pos[1])),
                    s,
-                   (ln -> ln[max(1, c2ic(ln, pos[2])):end])(line(b, pos[1])),
+                   (ln -> unirange(ln, pos[2]:length(ln)))(line(b, pos[1])),
                   )
            )
 end
@@ -125,12 +153,12 @@ function paste(b::Buffer, pos, s::String)
     else
         settext(b, [b.text[1:pos[1]-1];
                     [string(
-                            (t->t[1:c2ic(t, pos[2])])(b.text[pos[1]]),
+                            (t->unirange(t, 1:pos[2]))(b.text[pos[1]]),
                             s_array[1])];
                     s_array[2:end-1];
                     [string(
                             s_array[end],
-                            (t->t[c2ic(t, pos[2]+1):end])(b.text[pos[1]]))];
+                            (t->unirange(t, pos[2]+1:length(t)))(b.text[pos[1]]))];
                     b.text[pos[1]+1:end]
                    ])
     end
@@ -154,7 +182,8 @@ end
 
 function splitlines(b::Buffer, pos)
     settext(b, [b.text[1:pos[1]-1]; 
-                [b.text[pos[1]][1:pos[2]-1], b.text[pos[1]][max(1, pos[2]):end]];
+                [unirange(b.text[pos[1]], 1:pos[2]-1), 
+                 unirange(b.text[pos[1]], max(1, pos[2]):length(b.text[pos[1]]))];
                 b.text[pos[1]+1:end]])
 end
 
@@ -178,7 +207,8 @@ function delete_between(b::Buffer, pos1, pos2, reg='"')
     sp, ep = order_pos(pos1, pos2)
     yank_between(b::Buffer, sp, ep, reg)
     settext(b, [b.text[1:sp[1]-1];
-                [string(b.text[sp[1]][1:sp[2]-1], b.text[ep[1]][ep[2]:end])];
+                [string(unirange(b.text[sp[1]], 1:sp[2]-1), 
+                        unirange(b.text[ep[1]], ep[2]:length(b.text[ep[1]])))];
                 b.text[ep[1]+1:end]])
     b.cursor.pos .= sp
 end
@@ -188,7 +218,7 @@ function yank_between(b::Buffer, pos1, pos2, reg='"')
     if sp[1] == ep[1]
         b.registers[reg] = string(b.text[sp[1]][sp[2]:ep[2]-1])
     else
-        b.registers[reg] = join([b.text[sp[1]][sp[2]:end];
+        b.registers[reg] = join([unirange(b.text[sp[1]], sp[2]:length(b.text[sp[1]]));
                                 b.text[sp[1]+1:ep[1]-1];
                                 b.text[ep[1]][1:ep[2]-1]], '\n')
     end

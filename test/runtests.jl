@@ -11,6 +11,11 @@ orig = readlines("file")
     @test Joy.parse_n([]) == 1
 end
 
+@testset "chr2ind range" begin
+    s = "aåäöasdf"
+    @test Joy.chr2ind(s, 2:4) == 2:1:7
+end
+
 @testset "Find symbol" begin
     @test Joy.findsymbol("Lörem ipsum dolor sit amet", 'i', 1) == 7
     @test Joy.findsymbol("Lörem ipsum dolor sit amet", 'i', 2) == 20
@@ -47,12 +52,14 @@ end
     @test Joy.line(buffer)[Joy.x(buffer):Joy.x(buffer)+2] == "sit"
     Joy.replay(buffer, "50hW")
     @test Joy.line(buffer)[Joy.x(buffer):Joy.x(buffer)+4] == "ipsum"
-    Joy.replay(buffer, "j10w")
+    Joy.replay(buffer, "b")
+    @test Joy.line(buffer)[Joy.x(buffer):Joy.x(buffer)+4] == "Lorem"
+    Joy.replay(buffer, "wj10w")
     @test Joy.line(buffer) == ""
     Joy.replay(buffer, "e")
     @test Joy.line(buffer)[Joy.x(buffer)] == 't'
     Joy.replay(buffer, "3b")
-    @test Joy.line(buffer)[Joy.x(buffer)] == 'a'
+    @test Joy.line(buffer)[Joy.x(buffer)] == '.'
 end
 
 @testset "Delete mode" begin

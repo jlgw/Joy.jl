@@ -62,7 +62,11 @@ end
 function render_line(b::Buffer, l::String)
     s = Base.clamp(left(b), 1, max(1,length(l)))
     f = Base.clamp(right(b), 1, length(l))
-    displ = l[s:f]
+    if length(l)>=1
+        displ = l[chr2ind(l, s):chr2ind(l, f)]
+    else
+        displ = ""
+    end
     write(STDOUT, "$displ \n")
 end
 

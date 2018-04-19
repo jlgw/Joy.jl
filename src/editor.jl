@@ -3,6 +3,8 @@
 #This needs to be reconsidered
 if !isdefined(:self)
     const self = init([""])
+    handle_raw(self, 'j')
+    handle_raw(self, 'w')
 end
 
 function run(b::Buffer)

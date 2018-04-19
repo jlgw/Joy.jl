@@ -1,8 +1,8 @@
 function insertat(b::Buffer, c::Char, pos)
     pr = b.text[pos[1]]
-    b.text[pos[1]] = string(pr[1:min(c2ic(pr, pos[2]-1),end)],
+    b.text[pos[1]] = string(unirange(pr, 1:pos[2]-1),
                             c,
-                            pr[max(1,c2ic(pr, pos[2])):end],
+                            unirange(pr, pos[2]:length(pr)),
                            )
 end
 
