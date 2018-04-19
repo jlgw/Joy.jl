@@ -13,10 +13,13 @@ function run(b::Buffer)
     handle_raw(b, r)
     move_sys_cursor(1,1)
     render(b)
+    h = bottom(b)-top(b)
     if mode(b)==command_mode
         write(STDOUT, string(":", b.state[:command]))
+        move_sys_cursor(h+3, 1+parse(b.state[:command_insert]))
     elseif mode(b)==search_mode
         write(STDOUT, string("/", b.state[:search]))
+        move_sys_cursor(h+3, 1+parse(b.state[:search_insert]))
     else
         move_sys_cursor(b.cursor.pos[1]-top(b)+1, b.cursor.pos[2]-left(b)+1)
     end

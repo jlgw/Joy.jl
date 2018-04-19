@@ -77,6 +77,6 @@ function render(b::Buffer)
         render_line(b, l)
     end
     #Change hardcoded stuff
-    tildes = max(0, top(b)-length(b.text))
-    write(STDOUT, string("~\n"^tildes, b.state[:console], "  \n"))
+    tildes = max(0, (bottom(b)-top(b)+1)-length(b.text))
+    write(STDOUT, string("~\n"^tildes, b.state[:console]))
 end
