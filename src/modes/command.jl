@@ -1,4 +1,6 @@
 # It would be cool if this were an actual REPL with completion etc
+#Right now, we have some emacs keybindings for moving forward and back, (ctrl-f, ctrl-b, ctrl-a, ctrl-e)
+# as well as ctrl-k, ctrl-j to get previous/next commands from command history
 
 function evalcmd(b::Buffer, s::String)
     try

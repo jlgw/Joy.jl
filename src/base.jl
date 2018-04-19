@@ -67,10 +67,11 @@ function render_line(b::Buffer, l::String)
     else
         displ = ""
     end
-    write(STDOUT, "$displ \n")
+    write(STDOUT, "$displ\n")
 end
 
 function render(b::Buffer)
+    resize(b)
     clear_screen()
     #Change parsing to something else
     for l in b.text[max(1,top(b)):min(end, bottom(b))]

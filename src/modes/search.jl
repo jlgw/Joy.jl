@@ -1,3 +1,6 @@
+#Right now, we have some emacs keybindings for moving forward and back, (ctrl-f, ctrl-b, ctrl-a, ctrl-e)
+# as well as ctrl-k, ctrl-j to get previous/next commands from command history
+
 function after_search(b::Buffer)
     b.mode[1] = b.mode[2]
     after(b)
@@ -19,6 +22,7 @@ function search(b::Buffer)
         after(self)
     else
         b.state[:log] = "NOT FOUND"
+        escape(self)
     end
     b.state[:search_history] *= "\n"*b.state[:search]
     b.state[:search_n] = "$(parse(b.state[:search_n])+1)"

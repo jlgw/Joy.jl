@@ -1,28 +1,5 @@
 include("extra_modes.jl")
 
-# Should be cleaned up
-function set_boundaries(b::Buffer, ind::Integer, first::Symbol, last::Symbol)
-    #remove parsing from here
-    f, l = parse.([b.state[first], b.state[last]])
-    if f > ind
-        d = ind - f
-    elseif l < ind
-        d = ind - l
-    else
-        d = 0
-    end
-    b.state[first], b.state[last] = string.([f, l]+d)
-end
-function set_boundaries(b::Buffer)
-    set_boundaries(b, y(b), :top, :bottom)
-    df = right(b)-left(b)
-    b.state[:left], b.state[:right] = string.([max(1, x(b)-df), max(df+1, x(b))])
-end
-function resize(b::Buffer, height, width)
-    b.state[:top], b.state[:bottom] = string.([top(b), top(b) + height])
-    b.state[:left], b.state[:right] = string.([left(b), left(b) + width])
-end
-
 function after_normal(b::Buffer)
     clear_arg(b)
     clamp(b)

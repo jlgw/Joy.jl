@@ -35,16 +35,6 @@ function unirange(s::String, range::Range)
         error("Only single step range permitted")
     end
 end
-function c2ic(s::String, n::Integer)
-    if n<1
-        return 0
-    elseif n>length(s)
-        return sizeof(s)+1
-    else
-        return chr2ind(s, n)
-    end
-end
-
 
 function after(b::Buffer)
     if mode(b)==normal_mode
@@ -126,6 +116,39 @@ function parse_n(args::Array)
 end
 function parse_n(b::Buffer) 
     parse_n(b.args)
+end
+
+# Should be cleaned up
+function set_boundaries(b::Buffer, ind::Integer, first::Symbol, last::Symbol)
+    #remove parsing from here
+    f, l = parse.([b.state[first], b.state[last]])
+    if f > ind
+        d = ind - f
+    elseif l < ind
+        d = ind - l
+    else
+        d = 0
+    end
+    b.state[first], b.state[last] = string.([f, l]+d)
+end
+function set_boundaries(b::Buffer)
+    set_boundaries(b, y(b), :top, :bottom)
+    df = right(b)-left(b)
+    b.state[:left], b.state[:right] = string.([max(1, x(b)-df), max(df+1, x(b))])
+end
+function resize(b::Buffer, height, width)
+    b.state[:top], b.state[:bottom] = string.([top(b), top(b) + height])
+    b.state[:left], b.state[:right] = string.([left(b), left(b) + width])
+end
+
+function resize(b::Buffer)
+    try
+        c = parse(Int, join(Char.(read(`tput cols`))))
+        r = parse(Int, join(Char.(read(`tput lines`))))
+        resize(b, r-3, c-1)
+    catch z
+        b.state[:log] = "$z"
+    end
 end
 
 function clear_arg(b::Buffer)
