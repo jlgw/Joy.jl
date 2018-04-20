@@ -1,17 +1,13 @@
-#Some constructs shamelessly stolen from TerminalMenus
-
 #This needs to be reconsidered
 if !isdefined(:self)
     const self = init([""])
-    handle_raw(self, 'j')
-    handle_raw(self, 'w')
+    replay(self, "wh:\e/\e") #ugly hack but it works
 end
 
 function run(b::Buffer)
     b.state[:log] = ""
     r = read(STDIN, Char)
     handle_raw(b, r)
-    move_sys_cursor(1,1)
     render(b)
     h = bottom(b)-top(b)
     if mode(b)==command_mode
@@ -40,6 +36,7 @@ function attach(b::Buffer)
 end
 function finalize(b::Buffer)
     clear_screen()
+    move_sys_cursor(1,1)
     term = Base.REPL.Terminals.TTYTerminal(get(ENV, "TERM", "dumb"), STDIN, STDOUT, STDERR)
     Base.REPL.raw!(term, false)
 end
@@ -53,7 +50,7 @@ function open(st::String)
     settext(self, data)
     #Change later
     self.state[:top] = "1"
-    self.state[:bottom] = "19"
+    self.state[:bottom] = "20"
     if self.state[:running] == "false"
         attach(self)
     end

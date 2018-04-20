@@ -15,24 +15,29 @@ julia> Pkg.clone("https://github.com/lancebeet/Joy.jl")
 
 ## How to use
 To open existing text file:
+
 ```julia
 julia> using Joy
 julia> buffer = Joy.open("textfile")
 ```
 To exit:
+
 ```julia
 :quit()
 ```
 To save:
+
 ```julia
 :save("filename")
 ```
 Reattaching to an existing buffer from the REPL:
+
 ```julia
 julia> Joy.attach(buffer)
 ```
 
 To edit files directly from the command line, add the following to your shell config file (.bashrc, .profile etc):
+
 ```bash
 function joy() { julia -e "using Joy; Joy.open(\"$1\")"; }
 ```

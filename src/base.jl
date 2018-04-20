@@ -73,6 +73,7 @@ end
 function render(b::Buffer)
     resize(b)
     clear_screen()
+    move_sys_cursor(1,1)
     #Change parsing to something else
     for l in b.text[max(1,top(b)):min(end, bottom(b))]
         render_line(b, l)

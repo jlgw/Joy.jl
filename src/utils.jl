@@ -7,35 +7,6 @@ xs(b::Buffer)   = "$(x(b))"
 xu(b::Buffer)   = chr2ind(line(b), x(b))
 posu(b::Buffer) = [y(b), xu(b)]
 
-chr2ind(s::String, n::Integer) = Base.chr2ind(s, n)
-function chr2ind(s::String, range::Range)
-    if length(s) == 0 || length(range) == 0
-        return 0:-1
-    else
-        ec = chr2ind(s, range.stop)
-        sc = chr2ind(s, range.start)
-        if step(range)>0
-            sc:step(range):(ec+sizeof(s[ec:ec])-1)
-        else
-            sc+sizeof(s[sc:sc])-1:step(range):ec
-        end
-    end
-end
-function unirange(s::String, range::Range)
-    if length(s) == 0 || length(range) == 0
-        ""
-    elseif step(range) == 1
-        r = chr2ind(s, range)
-        s[r.start:r.stop]
-    elseif step(range) == -1
-        s = reverse(s)
-        r = chr2ind(s, length(s)-range+1)
-        s[r.start:r.stop]
-    else
-        error("Only single step range permitted")
-    end
-end
-
 function after(b::Buffer)
     if mode(b)==normal_mode
         after_normal(b)
@@ -78,10 +49,10 @@ end
 
 function escape(b::Buffer)
     setmode(b, normal_mode)
-    clamp(b)
+    clamp!(b)
 end
 
-function clamp(b::Buffer, edgecase=false)
+function clamp!(b::Buffer, edgecase=false)
     b.cursor.pos[1] = Base.clamp(y(b), 1, height(b))
     if width(b) > 0
         b.cursor.pos[2] = Base.clamp(x(b), 1, width(b)+edgecase)
@@ -143,8 +114,9 @@ end
 
 function resize(b::Buffer)
     try
-        c = parse(Int, join(Char.(read(`tput cols`))))
-        r = parse(Int, join(Char.(read(`tput lines`))))
+        term = Base.REPL.Terminals.TTYTerminal(get(ENV, "TERM", "dumb"), STDIN, STDOUT, STDERR)
+        c = Base.Terminals.width(term)
+        r = Base.Terminals.height(term)
         resize(b, r-3, c-1)
     catch z
         b.state[:log] = "$z"
@@ -272,12 +244,6 @@ function reconfigure(b)
     (f -> evalcmd(b, f)).(files)
 end
 
-function nmap(c::Char, f)
-    normal_actions[c] = f
-end
-function nmap(c::Char, s::String)
-    normal_actions[c] = b -> replay(b, s)
-end
 
 function quit(b::Buffer)
     b.state[:running] = "false"

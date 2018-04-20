@@ -60,7 +60,6 @@ function prev_pos_naive(b::Buffer, r::Regex, n=1)
         n += 1
     end
     m = next_pos(s, r, n)
-    b.state[:m] = "$m"
     if m!=-1
         return pos(b).-[0,m-1]
     else

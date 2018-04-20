@@ -1,5 +1,6 @@
 module Joy
 include("base.jl")
+include("string_utils.jl")
 include("utils.jl")
 include("words.jl")
 

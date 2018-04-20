@@ -2,7 +2,7 @@ include("extra_modes.jl")
 
 function after_normal(b::Buffer)
     clear_arg(b)
-    clamp(b)
+    clamp!(b)
     set_boundaries(b)
 end
 
@@ -95,4 +95,10 @@ normal_actions = merge(movements,
                            )
                       )
 
+function nmap(c::Char, f)
+    normal_actions[c] = f
+end
+function nmap(c::Char, s::String)
+    normal_actions[c] = b -> replay(b, s)
+end
 normal_mode = Mode("normal", normal_actions)

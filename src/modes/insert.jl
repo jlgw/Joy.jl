@@ -31,7 +31,7 @@ function insert_fn(c)
             escape_insert(b)
         elseif c=='\x7f'
             deleteback(b)
-            clamp(b, true)
+            clamp!(b, true)
         elseif c=='\r'
             splitp(b)
         else 
