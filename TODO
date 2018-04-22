@@ -8,4 +8,5 @@ Numeric states/registers/vars container to avoid parsing but maintaining narrow 
 Julia specific default functionality: Syntax highlighting, Word/Latex completion in insert/command mode
 Easy to use constructors for new modes with some default functionality (escaping, insert type modes etc)
 Docstrings
+It's wasteful for the renderer to always render all text, it should only re-render when :top, :bottom, or the actual text changes
 The method next_pos_naive calculates the word length of all following lines in the buffer. This would of course be unnecessarily slow when editing a large document. Regarding words/Words every line is at least one w/W, so the numerical argument is the upper bound for the number of lines to check.

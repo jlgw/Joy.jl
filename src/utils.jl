@@ -273,7 +273,9 @@ source(b::Buffer) = evalcmd(b, join(b.text, '\n'))
 function reconfigure(b::Buffer)
     pkdir = Pkg.Dir.path("Joy")
     files = ["include(\"$pkdir/src/base.jl\")",
+     "include(\"$pkdir/src/string_utils.jl\")",
      "include(\"$pkdir/src/utils.jl\")",
+     "include(\"$pkdir/src/syntax.jl\")",
      "include(\"$pkdir/src/words.jl\")",
      "include(\"$pkdir/src/modes/movements.jl\")",
      "include(\"$pkdir/src/modes/normal.jl\")",

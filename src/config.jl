@@ -12,6 +12,7 @@ function init(text)
     state[:bottom] = "19"
     state[:left] = "0"
     state[:right] = "80"
+    state[:syntax] = "true"
     registers = Dict{Char, String}()
     buffer = Buffer(text, 
                     cursor, 

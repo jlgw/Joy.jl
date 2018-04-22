@@ -31,7 +31,3 @@ function replace!(c::Array{String, 1}, pattern, repl)
     map!(s->replace(s, pattern, repl), c)
 end
 
-function colorize(s::String, c, def="\e[0m")
-    tc = Base.text_colors
-    c in keys(tc) ? string(tc[c], s, def) : s
-end

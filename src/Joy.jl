@@ -1,8 +1,10 @@
 module Joy
+
 include("base.jl")
 include("string_utils.jl")
 include("utils.jl")
 include("words.jl")
+include("syntax.jl")
 
 include("modes/movements.jl")
 include("modes/normal.jl")

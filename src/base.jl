@@ -67,6 +67,9 @@ function render_line(b::Buffer, l::String)
     else
         displ = ""
     end
+    if :syntax in keys(b.state) && b.state[:syntax] == "true"
+        displ = highlight(displ)
+    end
     write(STDOUT, "$displ\n")
 end
 
