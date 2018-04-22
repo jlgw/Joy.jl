@@ -82,6 +82,14 @@ end
     Joy.replay(buffer, "99k99h")
     Joy.replay(buffer, "\"ayw")
     @test buffer.registers['a'] == "Lorem\n"
+    Joy.settext(buffer, ["a", "b"])
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "yyp")
+    @test buffer.text == ["a", "a", "b"]
+    Joy.settext(buffer, ["a", "b"])
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "ddp")
+    Joy.settext(buffer, ["b", "a"])
 end
 @testset "Search" begin
     Joy.replay(buffer, "99k99h")

@@ -132,6 +132,20 @@ function deleteat(b::Buffer, pos, n)
     b.text[pos[1]] = string(unirange(pr, 1:pos[2]-1), unirange(pr, pos[2]+n:length(pr)))
 end
 
+function paste_lines(b::Buffer, ln, 
+                     s::Union{Array{String,1}, Array{SubString{String},1}})
+    settext(b, [b.text[1:ln-1];
+                s;
+                b.text[ln:end]])
+end
+paste_lines(b::Buffer, ln, s::String) = paste_lines(b, ln, split(s, '\n')) 
+function paste_lines(b::Buffer, s::Union{Array{String, 1}, String})
+    paste_lines(b, y(b), s)
+end
+function pastea_lines(b::Buffer, s::String)
+    paste(lines, b, y(b)+1, s)
+end
+
 function paste_single(b::Buffer, pos, s::String)
     setline(b, 
             pos[1], 
@@ -142,20 +156,25 @@ function paste_single(b::Buffer, pos, s::String)
            )
 end
 function paste(b::Buffer, pos, s::String)
-    s_array = split(s, '\n')
-    if length(s_array) == 1
-        paste_single(b::Buffer, pos, s)
+    if s[1] == '\e' #Line copies add an escape symbol before the text
+        b.state[:log] = "$pos"
+        paste_lines(b, pos[1], s[2:end])
     else
-        settext(b, [b.text[1:pos[1]-1];
-                    [string(
-                            (t->unirange(t, 1:pos[2]))(b.text[pos[1]]),
-                            s_array[1])];
-                    s_array[2:end-1];
-                    [string(
-                            s_array[end],
-                            (t->unirange(t, pos[2]+1:length(t)))(b.text[pos[1]]))];
-                    b.text[pos[1]+1:end]
-                   ])
+        s_array = split(s, '\n')
+        if length(s_array) == 1
+            paste_single(b::Buffer, pos, s)
+        else
+            settext(b, [b.text[1:pos[1]-1];
+                        [string(
+                                (t->unirange(t, 1:pos[2]))(b.text[pos[1]]),
+                                s_array[1])];
+                        s_array[2:end-1];
+                        [string(
+                                s_array[end],
+                                (t->unirange(t, pos[2]+1:length(t)))(b.text[pos[1]]))];
+                        b.text[pos[1]+1:end]
+                       ])
+        end
     end
 end
 function paste(b::Buffer, pos, c::Char)
@@ -166,7 +185,21 @@ function paste(b::Buffer, pos, c::Char)
     end
 end
 paste(b::Buffer, s) = paste(b, pos(b), s)
-pastea(b::Buffer, s) = paste(b, pos(b)+[0, 1], s)
+function pastea(b::Buffer, pos, s::String)
+    if s[1] =='\e'
+        paste(b, pos+[1, 0], s)
+    else
+        paste(b, pos+[0, 1], s)
+    end
+end
+function pastea(b::Buffer, pos, c::Char)
+    if c in keys(b.registers)
+        pastea(b, pos, b.registers[c])
+    else
+        self.state[:log] = "Register $c empty"
+    end
+end
+pastea(b::Buffer, s) = pastea(b::Buffer, pos(b), s)
 
 function joinlines(b::Buffer, interval::Tuple, delimiter=" ")
     #settext is slow in this context, we can make this more efficient
@@ -182,10 +215,10 @@ function splitlines(b::Buffer, pos)
                 b.text[pos[1]+1:end]])
 end
 
-function delete_lines(b::Buffer, interval::Tuple)
+function delete_lines(b::Buffer, interval::UnitRange) #Only works with unit range right now
     #settext is slow in this context, we can make this more efficient
-    settext(b, [b.text[1:interval[1]-1]; 
-                b.text[interval[2]+1:end]])
+    yank_lines(b, interval)
+    splice!(b.text, interval)
 end
 
 function order_pos(pos1, pos2)

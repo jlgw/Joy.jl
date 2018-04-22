@@ -72,7 +72,7 @@ end
 function delete_lines(b::Buffer)
     #We need a yank here
     n = parse_n(b.args)
-    delete_lines(b, (y(b), y(b)+n-1))
+    delete_lines(b, y(b):y(b)+n-1)
     escape(b)
 end
 
@@ -92,9 +92,17 @@ function after_yank(b::Buffer)
     escape(b)
 end
 
+function yank_lines(b::Buffer, range::Range)
+    reg = b.state[:register][1]
+    rstart, rstop = Base.clamp!([range.start, range.stop], 1, height(b))
+    range = rstart:step(range):rstop
+    b.registers[reg] = string('\e', join(b.text[range], '\n'))
+    #Line copies add an escape symbol before the text
+end
+    
 function yank_lines(b::Buffer)
     n = parse_n(b.args)
-    yank_lines(b, (y(b), y(b)+n-1))
+    yank_lines(b, y(b):y(b)+n-1)
     escape(b)
 end
 
