@@ -13,7 +13,7 @@ function deleteback(b::Buffer)
     elseif y(b) > 1
         b.cursor.pos[1] -= 1
         b.cursor.pos[2] = width(b) + 1
-        joinlines(b, (y(b), y(b) + 1))
+        join_lines(b, (y(b), y(b) + 1), "")
     end
 end
 function splitp(b::Buffer)

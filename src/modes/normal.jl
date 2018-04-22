@@ -13,7 +13,7 @@ end
 
 function join_arg(b::Buffer)
     n = parse_n(b.args)
-    joinlines(b, (b.cursor.pos[1],b.cursor.pos[1]+n))
+    join_lines(b, (b.cursor.pos[1],b.cursor.pos[1]+n))
     after(b)
 end
 function insert(b::Buffer)

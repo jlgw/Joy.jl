@@ -61,6 +61,13 @@ function clamp!(b::Buffer, edgecase=false)
     end
 end
 
+function clamp_range(r::UnitRange, low::Number, high::Number)
+    Base.clamp(r.start, low, high):Base.clamp(r.stop, low, high)
+end
+function clamp_range(r::StepRange, low::Number, high::Number)
+    Base.clamp(r.start, low, high):step(r):Base.clamp(r.stop, low, high)
+end
+
 function findsymbol(s::String, c::Char, n::Integer)
     p = findn([s...] .== c)
     if n>length(p)
@@ -133,7 +140,7 @@ function deleteat(b::Buffer, pos, n)
 end
 
 function paste_lines(b::Buffer, ln, 
-                     s::Union{Array{String,1}, Array{SubString{String},1}})
+                     s::Array{T,1} where T <: Union{String, SubString{String}})
     settext(b, [b.text[1:ln-1];
                 s;
                 b.text[ln:end]])
@@ -164,14 +171,12 @@ function paste(b::Buffer, pos, s::String)
         if length(s_array) == 1
             paste_single(b::Buffer, pos, s)
         else
+            ln1 = string((t->unirange(t, 1:pos[2]))(b.text[pos[1]]), s_array[1])
+            ln2 = string(s_array[end], (t->unirange(t, pos[2]+1:length(t)))(b.text[pos[1]]))
             settext(b, [b.text[1:pos[1]-1];
-                        [string(
-                                (t->unirange(t, 1:pos[2]))(b.text[pos[1]]),
-                                s_array[1])];
+                        ln1;
                         s_array[2:end-1];
-                        [string(
-                                s_array[end],
-                                (t->unirange(t, pos[2]+1:length(t)))(b.text[pos[1]]))];
+                        ln2;
                         b.text[pos[1]+1:end]
                        ])
         end
@@ -201,24 +206,27 @@ function pastea(b::Buffer, pos, c::Char)
 end
 pastea(b::Buffer, s) = pastea(b::Buffer, pos(b), s)
 
-function joinlines(b::Buffer, interval::Tuple, delimiter=" ")
-    #settext is slow in this context, we can make this more efficient
-    settext(b, [b.text[1:interval[1]-1];
-                [join(b.text[interval[1]:min(end, interval[2])])];
-                b.text[interval[2]+1:end]])
+function join_lines(b::Buffer, range::Range, delimiter=" ")
+    range = clamp_range(range, 1, height(b))
+    jl = join(b.text[range], delimiter)
+    deleteat!(b.text, range[2:end])
+    b.text[range[1]] = jl
+end
+function join_lines(b::Buffer, interval::Tuple, delimiter=" ")
+    join_lines(b, interval[1]:interval[2], delimiter)
 end
 
 function splitlines(b::Buffer, pos)
-    settext(b, [b.text[1:pos[1]-1]; 
-                [unirange(b.text[pos[1]], 1:pos[2]-1), 
-                 unirange(b.text[pos[1]], max(1, pos[2]):length(b.text[pos[1]]))];
-                b.text[pos[1]+1:end]])
+    nl1 = unirange(b.text[pos[1]], 1:pos[2]-1)
+    nl2 = unirange(b.text[pos[1]], max(1, pos[2]):length(b.text[pos[1]]))
+    b.text[pos[1]] = nl1
+    insert!(b.text, pos[1]+1, nl2)
 end
 
-function delete_lines(b::Buffer, interval::UnitRange) #Only works with unit range right now
-    #settext is slow in this context, we can make this more efficient
-    yank_lines(b, interval)
-    splice!(b.text, interval)
+function delete_lines(b::Buffer, range::Range)
+    range = clamp_range(range, 1, height(b))
+    yank_lines(b, range)
+    deleteat!(b.text, range)
 end
 
 function order_pos(pos1, pos2)
@@ -233,11 +241,11 @@ end
 function delete_between(b::Buffer, pos1, pos2, reg='"')
     #no unicode support for this right now
     sp, ep = order_pos(pos1, pos2)
-    yank_between(b::Buffer, sp, ep, reg)
-    settext(b, [b.text[1:sp[1]-1];
-                [string(unirange(b.text[sp[1]], 1:sp[2]-1), 
-                        unirange(b.text[ep[1]], ep[2]:length(b.text[ep[1]])))];
-                b.text[ep[1]+1:end]])
+    yank_between(b, sp, ep, reg)
+    nl = string(unirange(b.text[sp[1]], 1:sp[2]-1), 
+                unirange(b.text[ep[1]], ep[2]:length(b.text[ep[1]])))
+    deleteat!(b.text, sp[1]:ep[1]-1)
+    b.text[sp[1]] = nl
     b.cursor.pos .= sp
 end
 
@@ -262,7 +270,7 @@ replay(b::Buffer, s::Array{Char, 1}, n=1) = replay(b, join(s), n)
 
 source(b::Buffer) = evalcmd(b, join(b.text, '\n'))
 
-function reconfigure(b)
+function reconfigure(b::Buffer)
     pkdir = Pkg.Dir.path("Joy")
     files = ["include(\"$pkdir/src/base.jl\")",
      "include(\"$pkdir/src/utils.jl\")",

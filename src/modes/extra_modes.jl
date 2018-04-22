@@ -4,7 +4,12 @@ function after_go(b::Buffer)
     b.mode[1] = b.mode[2]
     after(b)
 end
-
+function go_join(b::Buffer)
+    n = parse_n(b::Buffer)
+    join_lines(b, y(b):y(b)+n, "")
+    after(b)
+    escape(b)
+end
 function gogo(b::Buffer)
     b.cursor.pos[1] = parse_n(b)
     after(b) 
@@ -13,6 +18,7 @@ end
 
 go_actions = Dict('g' => gogo,
                   'G' => gobottom,
+                  'J' => go_join,
                   '\e' => escape,
                  )
 go_mode = Mode("go", go_actions)
@@ -94,8 +100,7 @@ end
 
 function yank_lines(b::Buffer, range::Range)
     reg = b.state[:register][1]
-    rstart, rstop = Base.clamp!([range.start, range.stop], 1, height(b))
-    range = rstart:step(range):rstop
+    range = clamp_range(range, 1, height(b))
     b.registers[reg] = string('\e', join(b.text[range], '\n'))
     #Line copies add an escape symbol before the text
 end
