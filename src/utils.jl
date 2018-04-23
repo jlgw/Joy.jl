@@ -54,7 +54,7 @@ end
 
 function clamp!(b::Buffer, edgecase=false)
     b.cursor.pos[1] = Base.clamp(y(b), 1, height(b))
-    if width(b) > 0
+    if width(b) > 0 || edgecase
         b.cursor.pos[2] = Base.clamp(x(b), 1, width(b)+edgecase)
     else
         b.cursor.pos[2] = 0

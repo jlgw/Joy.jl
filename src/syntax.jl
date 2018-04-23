@@ -8,10 +8,10 @@ const word2color = Dict(
                         :FALSE         => :yellow,
                         :FLOAT         => :cyan,
                         :INTEGER       => :cyan,
-                        :STRING        => :green,
-                        :TRIPLE_STRING => :green,
+                        :STRING        => :light_green,
+                        :TRIPLE_STRING => :light_green,
                         :CHAR          => :red,
-                        :COMMENT       => :light_green,
+                        :COMMENT       => :green,
                         :ERROR         => :light_red,
                        )
 
