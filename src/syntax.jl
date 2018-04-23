@@ -1,25 +1,18 @@
 using Tokenize
 
 const word2color = Dict(
-                        :FUNCTION    => :light_magenta,
-                        :IF          => :light_magenta,
-                        :ELSE        => :light_magenta,
-                        :ELSEIF      => :light_magenta,
-                        :WHILE       => :light_magenta,
-                        :FOR         => :light_magenta,
-                        :RETURN      => :light_magenta,
-                        :END         => :light_magenta,
-                        :STRUCT      => :light_magenta,
-                        :TRUE        => :yellow,
-                        :FALSE       => :yellow,
-                        :STRING      => :green,
-                        :PAIR_ARROW  => :light_yellow,
-                        :EQ          => :light_yellow,
-                        :LESS        => :light_yellow,
-                        :GREATER     => :light_yellow,
-                        :CONDITIONAL => :light_yellow,
-                        :DECLARATION => :light_yellow,
-                        :COMMENT     => :light_green,
+                        :KEYWORD       => :light_magenta,
+                        :OP            => :light_yellow,
+                        :END           => :magenta,
+                        :TRUE          => :yellow,
+                        :FALSE         => :yellow,
+                        :FLOAT         => :cyan,
+                        :INTEGER       => :cyan,
+                        :STRING        => :green,
+                        :TRIPLE_STRING => :green,
+                        :CHAR          => :red,
+                        :COMMENT       => :light_green,
+                        :ERROR         => :light_red,
                        )
 
 const ttc = Dict(zip(getfield.(Tokenize.Tokens, collect(keys(word2color))),
@@ -31,8 +24,16 @@ function colorize(s::String, c, def="\e[0m")
 end
 
 function highlight(t::Tokenize.Tokens.Token)
+    s = untokenize(t)
+    k = Tokenize.Tokens.kind(t)
     ek = Tokenize.Tokens.exactkind(t)
-    ek in keys(ttc) ? colorize(untokenize(t), ttc[ek]) : untokenize(t)
+    if ek in keys(ttc)
+        colorize(s, ttc[ek])
+    elseif k in keys(ttc)
+        colorize(s, ttc[k])
+    else
+        s
+    end
 end
 
 function highlight(s::String)
