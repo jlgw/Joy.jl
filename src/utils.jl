@@ -259,6 +259,25 @@ function yank_between(b::Buffer, pos1, pos2, reg='"')
                                 b.text[ep[1]][1:ep[2]-1]], '\n')
     end
 end
+
+function undo(b::Buffer)
+    if b.state[:undo]=="undo"
+        setredo(b, b.text)
+        settext(b, b.undo)
+    else
+        b.state[:log] = "Multiple undos not supported"
+    end
+    after(b)
+end
+function redo(b::Buffer)
+    if b.state[:undo]=="redo"
+        settext(b, b.redo)
+    else
+        b.state[:log] = "Already at latest state"
+    end
+    after(b)
+end
+
 function replay(b::Buffer, actions::String, n=1)
     for i in 1:n
         for c in actions

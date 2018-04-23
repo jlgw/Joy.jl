@@ -1,4 +1,4 @@
-Undo functionality
+Improved undo functionality (Multi-level, diff-based)
 Julia-side macro that allows easier access to internal functions (not having to do self. etc)
 Startup laggy, find cause - Kind of solved
 Global vars, find a better solution

@@ -91,6 +91,7 @@ end
     Joy.replay(buffer, "ddp")
     Joy.settext(buffer, ["b", "a"])
 end
+
 @testset "Search" begin
     Joy.replay(buffer, "99k99h")
     Joy.settext(buffer, ["Lorem ipsum", "Lorem2 ipsum2"])
@@ -108,4 +109,13 @@ end
     Joy.replay(buffer, "/ipsum\r")
     Joy.replay(buffer, "n")
     @test Joy.pos(buffer) == [2,8]
+end
+
+@testset "Undo" begin
+    Joy.settext(buffer, ["Lorem ipsum", "ipsum lorem"])
+    Joy.replay(buffer, "99k99h")
+    Joy.replay(buffer, "ddu")
+    @test buffer.text == ["Lorem ipsum", "ipsum lorem"]
+    Joy.replay(buffer, "\x12")
+    @test buffer.text == ["ipsum lorem"]
 end

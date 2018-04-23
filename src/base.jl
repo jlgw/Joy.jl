@@ -27,6 +27,8 @@ end
 
 struct Buffer
     text::Array{String,1}
+    undo::Array{String,1} #Given time, this should be replaced with multi-level undo with diffs
+    redo::Array{String,1}
     cursor::Cursor
     mode::Array{Mode,1}
     state::Dict{Symbol, String}
@@ -39,8 +41,25 @@ function settext(b::Buffer, text)
     b.text .= text
 end
 
+function setundo(b::Buffer, text)
+    b.state[:undo] = "undo"
+    resize!(b.undo, length(text))
+    b.undo .= text
+end
+setundo(b::Buffer) = setundo(b, b.text)
+
+function setredo(b::Buffer, text)
+    b.state[:undo] = "redo"
+    resize!(b.redo, length(text))
+    b.redo .= text
+end
+setredo(b::Buffer) = setredo(b, b.text)
+
 mode(b::Buffer) = b.mode[1]
 function setmode(b::Buffer, m::Mode)
+    if m!=normal_mode
+        setundo(b)
+    end
     b.mode[1] = m
 end
 

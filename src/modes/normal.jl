@@ -7,11 +7,13 @@ function after_normal(b::Buffer)
 end
 
 function delete_char(b::Buffer)
+    setundo(b)
     deleteat(b, b.cursor.pos, parse_n(b))
     after(b)
 end
 
 function join_arg(b::Buffer)
+    setundo(b)
     n = parse_n(b.args)
     join_lines(b, (b.cursor.pos[1],b.cursor.pos[1]+n))
     after(b)
@@ -75,23 +77,25 @@ function paste_register(b::Buffer)
     b.state[:register] = "\""
 end
 normal_actions = merge(movements,
-                       Dict('i'  => insert,
-                            'a'  => inserta,
-                            'I'  => insert_beginning,
-                            'A'  => insert_end,
-                            '\e' => clear_arg,
-                            ':'  => enter_cmdmode,
-                            'x'  => delete_char,
-                            'r'  => enter_replacemode,
-                            'J'  => join_arg,
-                            'q'  => start_record,
-                            '@'  => start_replay,
-                            'd'  => enter_deletemode,
-                            'y'  => enter_yankmode,
-                            '"'  => enter_registermode,
-                            'p'  => pastea_register,
-                            'P'  => paste_register,
-                            'Z'  => quit,
+                       Dict('i'    => insert,
+                            'a'    => inserta,
+                            'I'    => insert_beginning,
+                            'A'    => insert_end,
+                            '\e'   => clear_arg,
+                            ':'    => enter_cmdmode,
+                            'x'    => delete_char,
+                            'r'    => enter_replacemode,
+                            'J'    => join_arg,
+                            'q'    => start_record,
+                            '@'    => start_replay,
+                            'd'    => enter_deletemode,
+                            'y'    => enter_yankmode,
+                            '"'    => enter_registermode,
+                            'p'    => pastea_register,
+                            'P'    => paste_register,
+                            'u'    => undo,
+                            '\x12' => redo,
+                            'Z'    => quit,
                            )
                       )
 
