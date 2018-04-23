@@ -2,7 +2,7 @@
 # as well as ctrl-k, ctrl-j to get previous/next commands from command history
 
 function after_search(b::Buffer)
-    b.mode[1] = b.mode[2]
+    setmode(b, b.mode[2])
     after(b)
 end
 

@@ -1,7 +1,7 @@
 #Go mode
 
 function after_go(b::Buffer)
-    b.mode[1] = b.mode[2]
+    setmode(b, b.mode[2])
     after(b)
 end
 function go_join(b::Buffer)
@@ -133,7 +133,7 @@ register_clipboardmode = Mode("register", Action(set_clipboard_register, x->true
 #This doesn't quite work as intended with delete, the sensible approach in vim is to remove the last
 # character as well (dtc is used for exlucive delete until)
 function after_find(b::Buffer)
-    b.mode[1] = b.mode[2]
+    setmode(b, b.mode[2])
     after(b)
 end
 
