@@ -36,7 +36,7 @@ struct Buffer
     args::Array{Char,1}
 end
 
-function settext(b::Buffer, text)
+function settext(b::Buffer, text::Array{String,1})
     resize!(b.text, length(text))
     b.text .= text
 end

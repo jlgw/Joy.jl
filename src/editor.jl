@@ -46,8 +46,11 @@ end
 
 function open(st::String)
     self.state[:filename] = st
-    data = readlines(st)
-    settext(self, data)
+    try
+        settext(self, readlines(st))
+    catch
+        settext(self, [""])
+    end
     #Change later
     self.state[:top] = "1"
     self.state[:bottom] = "20"
@@ -63,10 +66,11 @@ function open(b::Buffer, st)
 end
 
 function save(b::Buffer, st::String)
+    self.state[:filename] = st
     write(st, join(b.text, "\n"))
 end
 function save(b::Buffer)
-    if in(:filename, keys(b.state))
+    if in(:filename, keys(b.state)) && b.state[:filename]!=""
         save(b, b.state[:filename])
     else
         "No file name"
@@ -91,5 +95,6 @@ Base.show(io::IO, q::Quit) = quit()
 (q::Quit)() = quit()
 
 w = Save();
-q = Quit(); #Pretty amusing bug - reloading this file without the ; exits the editor since show() is called on q
+q = Quit();
+wq = (w,q)
 1

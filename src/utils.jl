@@ -53,6 +53,9 @@ function escape(b::Buffer)
 end
 
 function clamp!(b::Buffer, edgecase=false)
+    if height(b) == 0
+        settext(b, [""])
+    end
     b.cursor.pos[1] = Base.clamp(y(b), 1, height(b))
     if width(b) > 0 || edgecase
         b.cursor.pos[2] = Base.clamp(x(b), 1, width(b)+edgecase)

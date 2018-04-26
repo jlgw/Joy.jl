@@ -12,6 +12,11 @@ function chr2ind(s::String, range::Range)
         end
     end
 end
+"""
+unirange(s::String, range::Range)
+
+Like s[range] but for unicode.
+"""
 function unirange(s::String, range::Range)
     if length(s) == 0 || length(range) == 0
         ""
@@ -27,6 +32,11 @@ function unirange(s::String, range::Range)
     end
 end
 
+"""
+replace!(c::Array{String, 1}, pattern, repl)
+
+Replace pattern with repl in each member of c.
+"""
 function replace!(c::Array{String, 1}, pattern, repl)
     map!(s->replace(s, pattern, repl), c)
 end
