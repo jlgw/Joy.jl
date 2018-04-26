@@ -14,6 +14,9 @@ include("modes/command.jl")
 include("modes/search.jl")
 
 include("config.jl")
+include("spelling.jl")
+isfile("$(homedir())/.joyrc.jl") && include("$(homedir())/.joyrc.jl")
+
 include("editor.jl")
 
 end
