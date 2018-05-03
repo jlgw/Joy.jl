@@ -12,7 +12,11 @@ end
 function evalcmd(b::Buffer) 
     try
         escape(b)
-        c = eval(Base.parse_input_line(b.state[:command]))
+        if b.state[:command][1] == '?'
+            c = eval(Base.parse_input_line("@doc "*b.state[:command][2:end]))
+        else
+            c = eval(Base.parse_input_line(b.state[:command]))
+        end
         if b.state[:command][end] != ';'
             b.state[:log] = "$c"
         end
