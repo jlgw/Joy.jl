@@ -302,7 +302,9 @@ function reconfigure(b::Buffer)
      "include(\"$pkdir/src/modes/movements.jl\")",
      "include(\"$pkdir/src/modes/normal.jl\")",
      "include(\"$pkdir/src/modes/insert.jl\")",
+     "include(\"$pkdir/src/modes/calls.jl\")",
      "include(\"$pkdir/src/modes/command.jl\")",
+     "include(\"$pkdir/src/modes/search.jl\")",
      "include(\"$pkdir/src/config.jl\")",
      "include(\"$pkdir/src/editor.jl\")",
     ]
