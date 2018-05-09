@@ -76,35 +76,34 @@ function next_call(b::Buffer, s::Symbol)
     b.state[Symbol(s, :_ind)] = "$(Base.clamp(nextnum, 1, ncalls))"
 end
 
-#Hardcoded chars should be moved elsewhere at some point
+#Should be moved elsewhere at some point
+function reset_call(b::Buffer, s::Symbol, r::Bool)
+    r && (b.state[s] = "")
+    escape(b)
+    b.state[Symbol(s, :_ind)] = b.state[Symbol(s, :_n)]
+    b.state[Symbol(s, :_insert)] = "1"
+end
+
+const call_actions = Dict(
+                    '\v' => previous_call,
+                    '\n' => next_call,
+                    '\x06' => (b,s) -> step_dir(b, s, 1),
+                    '\x02' => (b,s) -> step_dir(b, s, -1),
+                    '\x01' => (b,s) -> step_endpt(b, s, 1),
+                    '\x05' => (b,s) -> step_endpt(b, s, -1),
+                    '\t' => compl,
+                   )
 function exec_fn(c, s::Symbol, evalfn, reset=true)
     function fn(b::Buffer)
         if c=='\e'
-            if reset
-                b.state[s] = ""
-            end
-            escape(b)
-            b.state[Symbol(s, :_ind)] = b.state[Symbol(s, :_n)]
-            b.state[Symbol(s, :_insert)] = "1"
+            reset_call(b, s, reset)
         elseif c=='\x7f'
             rmchar(b, s)
         elseif c=='\r'
             evalfn(b)
             b.state[Symbol(s, :_insert)] = "1"
-        elseif c=='\v'
-            previous_call(b, s)
-        elseif c=='\n'
-            next_call(b, s)
-        elseif c=='\x06'
-            step_dir(b, s, 1)
-        elseif c=='\x02'
-            step_dir(b, s, -1)
-        elseif c=='\x01'
-            step_endpt(b, s, 1)
-        elseif c=='\x05'
-            step_endpt(b, s, -1)
-        elseif c=='\t'
-            compl(b, s)
+        elseif c in keys(call_actions)
+            call_actions[c](b,s)
         else
             addchar(b, c, s)
         end

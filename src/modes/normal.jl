@@ -76,7 +76,7 @@ function paste_register(b::Buffer)
     paste(b, s)
     b.state[:register] = "\""
 end
-normal_actions = merge(movements,
+const normal_actions = merge(movements,
                        Dict('i'    => insert,
                             'a'    => inserta,
                             'I'    => insert_beginning,
