@@ -35,7 +35,8 @@ function next_pos_naive(b::Buffer, r::Regex, n=1)
     else
         lf = length(collect(eachmatch(r, s)))+1
         wc = cumsum(crs.(b.text[y(b)+1:end], r))
-        yoffset = findfirst(x->x>n, lf+wc)
+        ff = findfirst(x->x>n, lf.+wc)
+        yoffset = something(ff, 0)
         mc = n - lf
         if yoffset>1
             mc -= wc[yoffset-1]

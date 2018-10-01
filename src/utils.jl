@@ -27,10 +27,10 @@ function after(b::Buffer)
     end
 end
 
-top(b::Buffer) = parse(Int64, b.state[:top])
-bottom(b::Buffer) = parse(Int64, b.state[:bottom])
-left(b::Buffer) = parse(Int64, b.state[:left])
-right(b::Buffer) = parse(Int64, b.state[:right])
+top(b::Buffer) = tryparse(Int64, b.state[:top])
+bottom(b::Buffer) = tryparse(Int64, b.state[:bottom])
+left(b::Buffer) = tryparse(Int64, b.state[:left])
+right(b::Buffer) = tryparse(Int64, b.state[:right])
 function height(b::Buffer)
     length(b.text)
 end
@@ -72,7 +72,8 @@ function clamp_range(r::StepRange, low::Number, high::Number)
 end
 
 function findsymbol(s::String, c::Char, n::Integer)
-    p = findn([s...] .== c)
+    #p = findn([s...] .== c)
+    p = findall(!iszero, [s...] .== c)
     if n>length(p)
         return 0
     else
@@ -88,7 +89,7 @@ findsymbol(b::Buffer, c::Char) = findsymbol(b, c, parse_n(b))
 isint(c::Integer) = 47 < c < 58
 function parse_n(args::Array)
     n = length(args)
-    il = args[indexin([false], isint.(Int.(args)))[1]+1:end]
+    il = args[something(findlast(.!(isint.(Int.(args)))), 0)+1:end]
     if !isempty(il)
         parse(Int, join(il))
     else
@@ -110,7 +111,7 @@ function set_boundaries(b::Buffer, ind::Integer, first::Symbol, last::Symbol)
     else
         d = 0
     end
-    b.state[first], b.state[last] = string.([f, l]+d)
+    b.state[first], b.state[last] = string.([f, l].+d)
 end
 function set_boundaries(b::Buffer)
     set_boundaries(b, y(b), :top, :bottom)
@@ -209,7 +210,7 @@ function pastea(b::Buffer, pos, c::Char)
 end
 pastea(b::Buffer, s) = pastea(b::Buffer, pos(b), s)
 
-function join_lines(b::Buffer, range::Range, delimiter=" ")
+function join_lines(b::Buffer, range::AbstractRange, delimiter=" ")
     range = clamp_range(range, 1, height(b))
     jl = join(b.text[range], delimiter)
     deleteat!(b.text, range[2:end])
@@ -226,7 +227,7 @@ function splitlines(b::Buffer, pos)
     insert!(b.text, pos[1]+1, nl2)
 end
 
-function delete_lines(b::Buffer, range::Range)
+function delete_lines(b::Buffer, range::AbstractRange)
     range = clamp_range(range, 1, height(b))
     yank_lines(b, range)
     deleteat!(b.text, range)

@@ -98,7 +98,7 @@ function after_yank(b::Buffer)
     escape(b)
 end
 
-function yank_lines(b::Buffer, range::Range)
+function yank_lines(b::Buffer, range::AbstractRange)
     reg = b.state[:register][1]
     range = clamp_range(range, 1, height(b))
     b.registers[reg] = string('\e', join(b.text[range], '\n'))

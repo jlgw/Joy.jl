@@ -1,5 +1,5 @@
 chr2ind(s::String, n::Integer) = Base.chr2ind(s, n)
-function chr2ind(s::String, range::Range)
+function chr2ind(s::String, range::AbstractRange)
     if length(s) == 0 || length(range) == 0
         return 0:-1
     else
@@ -13,11 +13,11 @@ function chr2ind(s::String, range::Range)
     end
 end
 """
-unirange(s::String, range::Range)
+unirange(s::String, range::AbstractRange)
 
 Like s[range] but for unicode.
 """
-function unirange(s::String, range::Range)
+function unirange(s::String, range::AbstractRange)
     if length(s) == 0 || length(range) == 0
         ""
     elseif step(range) == 1

@@ -41,6 +41,12 @@ function settext(b::Buffer, text::Array{String,1})
     b.text .= text
 end
 
+#patch
+function settext(b::Buffer, text::Array{AbstractString,1})
+    resize!(b.text, length(text))
+    b.text .= text
+end
+
 function setundo(b::Buffer, text)
     b.state[:undo] = "undo"
     resize!(b.undo, length(text))
